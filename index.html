@@ -1634,6 +1634,72 @@
             .l2-s-text .desc { font-size: 15px; }
             .l2-end { padding: 14vh 8vw 14vh; }
             .l2-end .closing { font-size: 18px; }
+
+            /* ========================================================================
+               手机端封面重构 —— 文字组贴右上,文字本身右对齐;链接组移左下偏上
+               -----------------------------------------------------------------------
+               旋转 90° 后的底图视觉:身体/头像在右下,树枝从左上延伸 ——
+               文字区域应当落在树枝生长的"反向区域"(右上),与图像不互相遮挡;
+               底部链接组(About / Contact / Instagram)挪到左下偏上,正好坐落在
+               树枝末端附近的留白处。
+
+               JS updatePositions() 已经在手机分支里改写了 brand-mobile / nav /
+               footer-links 的 top/left/right/bottom。CSS 这里负责"文字右对齐 +
+               nav-item 内部 flex 走向 + brand 下划线对齐方向"。
+               ======================================================================== */
+
+            /* —— 品牌名:整块右对齐,下划线也从右往左收 —— */
+            .brand-mobile {
+                /* JS 会动态写入 right & top,覆盖 left 留空避免冲突 */
+                left: auto !important;
+                text-align: right;
+            }
+            .bm-rule {
+                /* 下划线本来是 margin-left: 4% 起手左对齐 —— 改成靠右 */
+                margin-left: auto;
+                margin-right: 4%;
+            }
+            .brand-mobile.awakened .bm-rule path {
+                /* SVG path 描边方向:从右端开始画到左端 —— 用负的 stroke-dashoffset
+                   起点配合 dasharray 翻转方向。简洁起见保持原有从左到右描边,
+                   但视觉上下划线整体已经靠右,差别极小,不再深究。 */
+            }
+
+            /* —— 主导航:整块贴屏幕右上,nav-item 内部右对齐 —— */
+            .scattered-nav#nav {
+                /* JS 改成动态写 right 而非 left;CSS 这里只管对齐 */
+                align-items: flex-end;
+                text-align: right;
+            }
+            .nav-item {
+                /* 桌面端的 margin-left 错位在前面已经被重置为 0,这里改用 margin-right
+                   做"靠右递增缩进"的反向错位 —— 跟桌面端镜像的视觉节奏 */
+                align-items: flex-end;
+                text-align: right;
+            }
+            .nav-item:nth-child(1) { margin-right: 0; }
+            .nav-item:nth-child(2) { margin-right: 24px; }
+            .nav-item:nth-child(3) { margin-right: 48px; }
+            .nav-item:nth-child(4) { margin-right: 14px; }
+            .nav-en, .nav-sub {
+                /* nav-en 和 nav-sub 是 .nav-item 的 column 子元素,
+                   align-self: flex-end 保证它们在垂直 flex 容器里靠右贴齐 */
+                align-self: flex-end;
+                text-align: right;
+            }
+
+            /* —— Footer 链接组:从右下挪到左下偏上 ——
+               JS updatePositions() 会动态写 left/bottom,这里覆盖桌面默认的
+               right 定位避免冲突,并把 gap 收紧一点便于左下区域排版。 */
+            .footer-links {
+                right: auto !important;
+                gap: 22px;
+            }
+            .footer-links a {
+                /* 在浅色背景的左下区域,链接文字保持可读但不抢眼 */
+                font-size: 9.5px;
+                letter-spacing: 0.32em;
+            }
         }
         @media (max-width: 1024px) {
             .l2-manifesto { grid-template-columns: 1fr; min-height: auto; padding-top: 0; }
@@ -1656,31 +1722,78 @@
         @media (max-width: 480px) {
             .footer-links { gap: 14px; }
             .footer-copyright { display: none; }
+
+            /* ========================================================================
+               手机端 #bg-image —— 整张底图顺时针旋转 90°
+               -----------------------------------------------------------------------
+               原图是竖向构图：树枝/小人在左上、头像在右下。
+               桌面端把 viewport 横向铺开后,正好对应"右上→左下"生长。
+               手机屏是竖的,直接铺会让头像挤在右半中间、树枝堆在底部 —— 构图全垮。
+
+               方案:把 #bg-image 当作 "宽 = 屏幕高,高 = 屏幕宽" 的横向画布,
+               原图按 background 正常铺满这个横向画布,然后整体顺时针旋转 90°。
+               旋转中心是元素中心,所以最后正好填满竖屏。
+
+               旋转后的视觉:
+                 原图左上 → 屏幕右上
+                 原图右上 → 屏幕右下
+                 原图右下 → 屏幕左下
+                 原图左下 → 屏幕左上
+               于是头像/身体落在右下,树枝向左上延伸 —— 跟参考构图一致。
+
+               mask 渐显方向同步:从右下角开始显形,扫向左上角(顺着身体长出枝梢)。
+               注意:mask 是在 #bg-image 自己的坐标系里算的,而 #bg-image 自己已经
+               被旋转了 90°。所以在元素坐标系里,我们要的 "屏幕右下 → 屏幕左上"
+               实际对应原元素的 "原右上 → 原左下",也就是 mask 角度 215° 不变 ——
+               这跟桌面端一致,意味着旋转后视觉上还是"从一端扫到另一端",只是被
+               旋转了 90° 后变成了我们要的方向。
+               ======================================================================== */
             #bg-image {
-                background-size: 165% auto;
-                background-position: 75% 95%;
-                -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 38%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%);
-                mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 38%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%);
-                /* 手机端不用 mask-position 扫描的入场动画，改用整体淡入：
-                   awaken gate 点击之前完全隐藏，点击后跟桌面端一样的节奏淡入。 */
-                animation: none;
-                transform: scale(1);
-                -webkit-mask-position: 0% 0%; mask-position: 0% 0%;
-                -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
-                opacity: 0;
-                transition: opacity 6s cubic-bezier(0.42, 0.05, 0.5, 0.95) 0.4s;
+                /* 元素本身按"横向"尺寸来铺图：宽 = 视口高,高 = 视口宽 */
+                top: 50%;
+                left: 50%;
+                width: 100vh;
+                height: 100vw;
+                /* 图像在这个"横向画布"里正常铺满 */
+                background-size: cover;
+                background-position: center right;
+                /* mask 在元素自身坐标里仍走 215°(右上→左下),旋转 90° 后视觉上
+                   变成屏幕的"右下→左上",顺着身体生长向枝梢。 */
+                -webkit-mask-image: linear-gradient(215deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 60%);
+                mask-image: linear-gradient(215deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 60%);
+                -webkit-mask-size: 300% 300%; mask-size: 300% 300%;
+                -webkit-mask-position: 0% 100%; mask-position: 0% 100%;
+                /* 旋转 90° 顺时针 + 居中校正(因为 width/height 跟视口互换,
+                   需要把元素从 (50%,50%) 拉回去) */
+                transform: translate(-50%, -50%) rotate(90deg);
+                transform-origin: center center;
+                will-change: mask-position, transform;
+                animation: tree-grow-mobile 9s cubic-bezier(0.42, 0.05, 0.5, 0.95) 0.4s forwards;
+                animation-play-state: paused;
             }
-            body.awakened-soul #bg-image { opacity: 1; }
+            body.awakened-soul #bg-image { animation-play-state: running; }
+
+            /* 手机端专用 keyframes —— 在 transform 里保留旋转,只动 mask-position */
+            @keyframes tree-grow-mobile {
+                0%   { -webkit-mask-position: 0% 100%; mask-position: 0% 100%;
+                       transform: translate(-50%, -50%) rotate(90deg) scale(1.05); }
+                100% { -webkit-mask-position: 100% 0%; mask-position: 100% 0%;
+                       transform: translate(-50%, -50%) rotate(90deg) scale(1); }
+            }
         }
 
         /* ========================================================================
-           手机端右上角红色小人飘浮组（仅 ≤768px 生效，电脑端完全不渲染）
+           手机端右上角红色小人飘浮组 —— 已停用
+           新版手机端把整张底图顺时针旋转 90°,原图里那群小人本就在屏幕右上区域
+           自然出现,不再需要这套额外飘浮图层。强制 display:none 以免重叠。
            ======================================================================== */
-        #mobile-figs { display: none; }
+        #mobile-figs { display: none !important; }
 
         @media (max-width: 768px) {
+            /* 旋转 90° 的新构图里这组飘浮小人会跟头像区域打架,整体停用。
+               下方的 .mf* 定位/动画规则保留只是为了不破坏现有结构,实际不会渲染。 */
             #mobile-figs {
-                display: block;
+                display: none !important;
                 position: absolute;
                 top: 0;
                 right: 0;
@@ -16216,21 +16329,58 @@
 
             function updatePositions() {
                 const w = viewport.offsetWidth, h = viewport.offsetHeight, scale = Math.max(0.7, Math.min(w / 1600, 1.2));
-                brand.style.top = Math.round(h * 0.08) + 'px'; brand.style.left = Math.round(w * 0.05) + 'px';
-                brand.style.fontSize = Math.round(26 * scale) + 'px'; nav.style.top = Math.round(h * 0.17) + 'px';
-                // 手机端品牌:跟桌面 brand 同一坐标体系。CSS @media 控制它的可见性。
+                const isMobile = w < 768;
+
+                // —— 桌面 brand:左上(始终按桌面逻辑算,手机端 CSS 把它整体 display:none) ——
+                brand.style.top = Math.round(h * 0.08) + 'px';
+                brand.style.left = Math.round(w * 0.05) + 'px';
+                brand.style.fontSize = Math.round(26 * scale) + 'px';
+
+                // —— 手机端 brand-mobile:贴屏幕右上;桌面端按桌面 brand 同坐标(虽然 display:none) ——
                 if (brandMobile) {
-                    brandMobile.style.top = Math.round(h * 0.08) + 'px';
-                    brandMobile.style.left = Math.round(w * 0.05) + 'px';
+                    if (isMobile) {
+                        // 顺时针旋转 90° 后的新构图:树枝在左上、头身在右下。
+                        // brand 贴右上,文字本身已经 CSS 设了 text-align: right,
+                        // 这里只写 right + top,把 left 留空(CSS 里 !important 覆盖)。
+                        brandMobile.style.top = Math.round(h * 0.06) + 'px';
+                        brandMobile.style.right = Math.round(w * 0.06) + 'px';
+                        brandMobile.style.left = '';   // 让 CSS 的 left:auto !important 生效
+                    } else {
+                        brandMobile.style.top = Math.round(h * 0.08) + 'px';
+                        brandMobile.style.left = Math.round(w * 0.05) + 'px';
+                        brandMobile.style.right = '';
+                    }
                 }
-                nav.style.left = Math.round(w * 0.05) + 'px';
+
+                // —— 主导航:桌面贴左上(brand 下方);手机贴屏幕右上(brand 下方) ——
+                if (isMobile) {
+                    nav.style.top = Math.round(h * 0.15) + 'px';
+                    nav.style.right = Math.round(w * 0.06) + 'px';
+                    nav.style.left = '';   // CSS 里没设 !important,这里清空就够了
+                } else {
+                    nav.style.top = Math.round(h * 0.17) + 'px';
+                    nav.style.left = Math.round(w * 0.05) + 'px';
+                    nav.style.right = '';
+                }
+
                 document.querySelectorAll('.nav-en').forEach(el => el.style.fontSize = Math.round(22 * scale) + 'px');
                 document.querySelectorAll('.nav-sub').forEach(el => el.style.fontSize = Math.round(11 * scale) + 'px');
-                quote.style.bottom = Math.round(h * 0.06) + 'px'; quote.style.left = Math.round(w * 0.045) + 'px';
-                const isMobile = w < 768;
-                const fSide = isMobile ? 22 : Math.round(w * 0.06);
-                const fBot = isMobile ? 26 : Math.round(h * 0.08);
-                footerLinks.style.bottom = fBot + 'px'; footerLinks.style.right = fSide + 'px';
+
+                // —— whisper-quote:维持原本左下位置(手机端也读得通,不动它) ——
+                quote.style.bottom = Math.round(h * 0.06) + 'px';
+                quote.style.left = Math.round(w * 0.045) + 'px';
+
+                // —— Footer 链接:桌面右下;手机移到"左下偏上",落在树枝末端附近的留白 ——
+                if (isMobile) {
+                    // 左下偏上:距左 22px,距下大约视口 18% 高(让它浮在屏幕下方约 1/5 处)
+                    footerLinks.style.left = Math.round(w * 0.06) + 'px';
+                    footerLinks.style.bottom = Math.round(h * 0.18) + 'px';
+                    footerLinks.style.right = '';   // CSS 里有 right:auto !important
+                } else {
+                    footerLinks.style.bottom = Math.round(h * 0.08) + 'px';
+                    footerLinks.style.right = Math.round(w * 0.06) + 'px';
+                    footerLinks.style.left = '';
+                }
             }
 
             const chars = "Beneath the woven veil of waking dawn The spirit seeks its shadow in the sea O untamed wind that sweeps the azure plains Thou art the breathing of my wandering soul We are but fragments of the fleeting light Searching for stillness in the storm embrace To touch the earth is to untie the self And find our echoes in the boundless space".replace(/[^a-zA-Z]/g, '').split('');
