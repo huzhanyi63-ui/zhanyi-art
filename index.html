@@ -1464,6 +1464,57 @@
             .footer-links { gap: 18px; }
             .footer-links a { font-size: 9px; letter-spacing: 0.3em; }
             .footer-copyright { font-size: 8.5px; letter-spacing: 0.28em; }
+
+            /* ========================================================================
+               手机端入场:Safari 安全方案 —— 纯 opacity 渐入,完全绕开字母级 transform
+               -----------------------------------------------------------------------
+               桌面端的入场是字母逐个从画外飞入,delay 可达 6+ 秒、每个字母独立合成层、
+               叠加 text-shadow 模糊参与合成 —— 这套在 Safari 上极易出现字母提前显形、
+               闪烁、错位。手机端我们走完全不同的路径:
+                 1) brand 标题:整体 opacity 渐入(去掉 translateY),手绘下划线一并淡入
+                 2) 四行 nav:每个 .nav-item 整体 opacity 渐入,内部字母强制设为最终态
+                    (opacity:1, transform:none, transition:none),让 split 后的字母不
+                    参与任何动画 —— Safari 完全不需要处理上百个 transitionDelay
+                 3) whisper-quote:沿用原 opacity 过渡即可
+               所有改动只在 max-width:768px 生效,桌面端唯美字母散落入场完全不动。
+               ======================================================================== */
+
+            /* 品牌:整体 opacity,去掉 translateY 位移 */
+            .brand-identity {
+                transform: none;
+                transition: opacity 2.2s ease;
+            }
+            .brand-identity.awakened { transform: none; }
+            /* 手绘下划线:只 opacity 淡入,不 scaleX */
+            .brand-identity::after {
+                transform: scaleX(1);
+                transition: opacity 1.8s ease 0.6s;
+            }
+            .brand-identity.awakened::after { transform: scaleX(1); }
+
+            /* 四行 nav:每个 .nav-item 整体控制 opacity,带 stagger */
+            .scattered-nav.ready { visibility: visible; }
+            .nav-item {
+                opacity: 0;
+                transition: opacity 1.4s ease;
+                will-change: auto;
+            }
+            .nav-item.awakened { opacity: 1; }
+            .nav-item:nth-child(1).awakened { transition-delay: 0.0s; }
+            .nav-item:nth-child(2).awakened { transition-delay: 0.35s; }
+            .nav-item:nth-child(3).awakened { transition-delay: 0.7s; }
+            .nav-item:nth-child(4).awakened { transition-delay: 1.05s; }
+
+            /* 关键:把 split 出来的 .letter 全部锁定为最终态 —— 不参与任何动画,
+               不创建合成层,不读 transitionDelay。父级的 opacity 过渡才是唯一的入场。 */
+            .nav-item .letter,
+            .nav-item.awakened .letter {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+                will-change: auto !important;
+                transition-delay: 0s !important;
+            }
             #level-two { padding: 0; }
             .l2-back { top: 20px; left: 20px; font-size: 13px; }
             .l2-chap { top: 22px; right: 20px; font-size: 8px; letter-spacing: 0.3em; }
@@ -1517,11 +1568,16 @@
                 background-position: 75% 95%;
                 -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 38%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%);
                 mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 38%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%);
+                /* 手机端不用 mask-position 扫描的入场动画，改用整体淡入：
+                   awaken gate 点击之前完全隐藏，点击后跟桌面端一样的节奏淡入。 */
                 animation: none;
                 transform: scale(1);
                 -webkit-mask-position: 0% 0%; mask-position: 0% 0%;
                 -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+                opacity: 0;
+                transition: opacity 6s cubic-bezier(0.42, 0.05, 0.5, 0.95) 0.4s;
             }
+            body.awakened-soul #bg-image { opacity: 1; }
         }
 
         /* ========================================================================
