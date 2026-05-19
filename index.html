@@ -48,12 +48,20 @@
             -webkit-mask-size: 300% 300%; mask-size: 300% 300%;
             -webkit-mask-position: 0% 100%; mask-position: 0% 100%;
             transform: scale(1.05);
-            will-change: mask-position, transform;
+            will-change: mask-position, transform, opacity;
             /* 【修复】：恢复我们打磨好的优雅、缓慢的入场动画曲线，而不是飞速闪现 */
             animation: tree-grow 9s cubic-bezier(0.42, 0.05, 0.5, 0.95) 0.4s forwards;
             animation-play-state: paused;   /* held until #awaken-gate is crossed */
+            /* iOS Safari fix — opacity gate ensures the figure is truly invisible
+               before awaken click, regardless of how Safari renders mask-position
+               on a paused animation. */
+            opacity: 0;
+            transition: opacity 1.4s ease;
         }
-        body.awakened-soul #bg-image { animation-play-state: running; }
+        body.awakened-soul #bg-image {
+            animation-play-state: running;
+            opacity: 1;
+        }
 
         @keyframes tree-grow {
             0% { -webkit-mask-position: 0% 100%; mask-position: 0% 100%; transform: scale(1.05); }
@@ -151,7 +159,12 @@
             opacity: 0;
             transform: scaleX(0.3);
             transform-origin: left center;
-            transition: opacity 1.6s ease 0.6s, transform 1.8s ease 0.4s;
+            /* 【iOS 修复】：下划线必须严格等文字淡入完毕（2s）之后再开始绘制，
+               否则 iOS Safari 会把伪元素提前渲染出来，造成"先画线再出文字"的丑陋顺序。
+               这里下划线延迟 2.2s 才开始 fade-in，保证 ZHANYI·HU 已经完全显现。 */
+            transition: opacity 1.4s ease 2.2s, transform 1.8s ease 2.2s;
+            /* 强制 iOS 把伪元素独立合成，避免它跟父元素分开渲染时序错乱 */
+            will-change: opacity, transform;
         }
         .brand-identity.awakened { opacity: 1; visibility: visible; transform: translateY(0); }
         .brand-identity.awakened::after { opacity: 1; transform: scaleX(1); }
@@ -1513,10 +1526,12 @@
             .footer-links { gap: 14px; }
             .footer-copyright { display: none; }
             #bg-image {
-                background-size: 165% auto;
-                background-position: 75% 95%;
-                -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 38%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%);
-                mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 38%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%);
+                /* 【手机端构图】：人物主体推到屏幕右上角外侧，只保留发丝/枝桠
+                   从右上角探入，左侧文字（ZHANYI·HU + 导航）完全不被遮挡。 */
+                background-size: 150% auto;
+                background-position: 115% -8%;
+                -webkit-mask-image: linear-gradient(225deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 28%, rgba(0,0,0,0) 62%);
+                mask-image: linear-gradient(225deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 28%, rgba(0,0,0,0) 62%);
                 animation: none;
                 transform: scale(1);
                 -webkit-mask-position: 0% 0%; mask-position: 0% 0%;
@@ -19750,12 +19765,14 @@
         window.__startAmbientAudio = function () {
             if (started || muted) return;
             started = true;
-            // Brief delay so letters lift off before the music begins.
+            // 【iOS Safari 修复】：play() 必须在用户点击的同步调用栈内立刻触发，
+            // 任何延迟（setTimeout / await）都会被 iOS 视为非用户手势而拒绝播放。
+            // 所以这里：立即开始播放（静音状态），再延迟启动 fade-in 音量曲线。
+            audio.volume = 0;
+            const p = audio.play();
+            if (p && p.catch) p.catch(()=>{});
             setTimeout(() => {
                 if (muted) return;
-                audio.volume = 0;
-                const p = audio.play();
-                if (p && p.catch) p.catch(()=>{});
                 fadeIn();
             }, INTRO_DELAY_MS);
         };
