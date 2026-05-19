@@ -12620,6 +12620,73 @@
             .aud-tracks .track-name { display: none; }
         }
 
+        /* ============================================================
+           MOBILE SAFARI FIX (≤768px). Two targeted patches:
+
+           1) #viewport uses 100vh → on iOS Safari that extends BENEATH the
+              bottom URL toolbar, so footer-links / audio-toggle positioned
+              with `bottom: Npx` get hidden underneath it. Switch to 100dvh
+              (dynamic viewport height) so the box equals the currently-
+              visible area. -webkit-fill-available is the fallback for
+              Safari < 15.4.
+
+           2) The per-letter scatter-in animation uses long random
+              transition-delays (i*0.35s + random) plus a -350~-450px
+              translate plus a -360~-720deg rotate, all running while the
+              bg-image mask animation, the canvas particle storm AND a
+              custom cursor URL applied to `*` are active. On mobile Safari
+              that exceeds the compositor budget — Safari drops later
+              letters' transitions and they snap to final state one-by-one
+              (the "popping" the user described). We override .letter on
+              mobile to a pure opacity fade with a tiny modulo stagger.
+              Transform is forced to the final (settled) value, so the
+              letters arrive in place; only opacity animates, which is
+              cheap on iOS GPU. The nav-item idx*1.5s base delay still
+              cascades the four lines.
+           ============================================================ */
+        @media (max-width: 768px) {
+            /* 1) Real viewport height so bottom UI clears Safari's chrome */
+            html, body { height: -webkit-fill-available; }
+            #viewport {
+                height: 100vh;                    /* fallback */
+                height: -webkit-fill-available;   /* old iOS */
+                height: 100dvh;                   /* modern */
+            }
+            /* Lift bottom-anchored UI just above the home-indicator zone */
+            .footer-links    { bottom: 28px !important; right: 22px !important; }
+            .footer-copyright{ bottom: 28px !important; left:  22px !important; }
+            .audio-toggle    { bottom: 78px !important; right: 22px !important; }
+
+            /* 2) Letter animation: opacity-only, neutralise JS-set transforms.
+               The settled-position transform is what awakened state already
+               applies, so by forcing it pre-awakened too we eliminate the
+               costly long-distance translate+rotate path. !important is
+               needed to beat the inline transition-delay set by splitLetters. */
+            .letter {
+                transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0) rotate(var(--fr, 0deg)) !important;
+                transition: opacity 0.9s ease-out !important;
+                transition-delay: 0s !important;
+            }
+            /* Gentle 6-bucket stagger inside each line; combined with the
+               nav-item base delay below this gives a soft sweep, not a
+               flat fade — and never a pop. */
+            .nav-en .letter:nth-child(6n+2), .nav-sub .letter:nth-child(6n+2) { transition-delay: 0.06s !important; }
+            .nav-en .letter:nth-child(6n+3), .nav-sub .letter:nth-child(6n+3) { transition-delay: 0.12s !important; }
+            .nav-en .letter:nth-child(6n+4), .nav-sub .letter:nth-child(6n+4) { transition-delay: 0.18s !important; }
+            .nav-en .letter:nth-child(6n+5), .nav-sub .letter:nth-child(6n+5) { transition-delay: 0.24s !important; }
+            .nav-en .letter:nth-child(6n),   .nav-sub .letter:nth-child(6n)   { transition-delay: 0.30s !important; }
+            /* Per-line cascade — overrides the bucket delays so each nav
+               line starts ~0.35s after the previous. */
+            .nav-item:nth-child(2) .letter { transition-delay: 0.35s !important; }
+            .nav-item:nth-child(3) .letter { transition-delay: 0.70s !important; }
+            .nav-item:nth-child(4) .letter { transition-delay: 1.05s !important; }
+
+            /* Don't break the scatter-out (level transition) animation */
+            .letter.scatter-out {
+                transition: transform 1.6s cubic-bezier(0.25,0.1,0.25,1), opacity 1.2s ease-out !important;
+            }
+        }
+
     </style>
 </head>
 <body>
