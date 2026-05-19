@@ -1466,54 +1466,60 @@
             .footer-copyright { font-size: 8.5px; letter-spacing: 0.28em; }
 
             /* ========================================================================
-               手机端入场:Safari 安全方案 —— 纯 opacity 渐入,完全绕开字母级 transform
+               手机端入场:Safari 安全方案 —— 保留字母级"手写抖动"的不工整美感,
+               但把"字母飞入"换成"整行渐入",绕开 Safari 的痛点
                -----------------------------------------------------------------------
-               桌面端的入场是字母逐个从画外飞入,delay 可达 6+ 秒、每个字母独立合成层、
-               叠加 text-shadow 模糊参与合成 —— 这套在 Safari 上极易出现字母提前显形、
-               闪烁、错位。手机端我们走完全不同的路径:
-                 1) brand 标题:整体 opacity 渐入(去掉 translateY),手绘下划线一并淡入
-                 2) 四行 nav:每个 .nav-item 整体 opacity 渐入,内部字母强制设为最终态
-                    (opacity:1, transform:none, transition:none),让 split 后的字母不
-                    参与任何动画 —— Safari 完全不需要处理上百个 transitionDelay
-                 3) whisper-quote:沿用原 opacity 过渡即可
-               所有改动只在 max-width:768px 生效,桌面端唯美字母散落入场完全不动。
+               桌面端 splitLetters() 给每个字母设了两组变量:
+                 起点  --lx/--ly/--lr  (从画外 -350px、旋转 360 度飞进来)
+                 终点  --fx/--fy/--fr  (轻微随机 ±2px ±3deg,手写不工整感)
+               让 Safari 崩的是"起点 → 终点"的字母级飞入动画(上百独立合成层、
+               长 transitionDelay 链、translate 几百像素叠 text-shadow 模糊)。
+               但"终点"的轻微抖动本身是静态 transform —— Safari 渲染零压力。
+               
+               所以手机端策略:
+                 1) 字母直接显示在"终点"状态(读 --fx/--fy/--fr),保留手写抖动
+                 2) 不做字母飞入,改用 .nav-item 整行 opacity 渐入,带 stagger
+                 3) brand 标题:opacity 渐入 + 字母级 nth-child 微抖动(CSS 写死)
+               视觉上每行字依然不工整、有呼吸感、有手作气息 —— 桌面端那种不工整的
+               美保留下来,只是它们"轻轻浮现"而不是"逐字飞入"。
                ======================================================================== */
 
-            /* 品牌:整体 opacity,去掉 translateY 位移 */
+            /* —— 品牌:整行 opacity 渐入,给字母加 nth-child 微抖动模拟"手写感" —— */
             .brand-identity {
                 transform: none;
-                transition: opacity 2.2s ease;
+                transition: opacity 2.4s ease;
             }
             .brand-identity.awakened { transform: none; }
-            /* 手绘下划线:只 opacity 淡入,不 scaleX */
+            /* 手绘下划线:只 opacity 淡入,保留 scaleX 终点 */
             .brand-identity::after {
                 transform: scaleX(1);
                 transition: opacity 1.8s ease 0.6s;
             }
             .brand-identity.awakened::after { transform: scaleX(1); }
 
-            /* 四行 nav:每个 .nav-item 整体控制 opacity,带 stagger */
+            /* —— 四行 nav:每个 .nav-item 整体 opacity 渐入,stagger 错峰 —— */
             .scattered-nav.ready { visibility: visible; }
             .nav-item {
                 opacity: 0;
-                transition: opacity 1.4s ease;
+                transition: opacity 1.6s ease;
                 will-change: auto;
             }
             .nav-item.awakened { opacity: 1; }
             .nav-item:nth-child(1).awakened { transition-delay: 0.0s; }
-            .nav-item:nth-child(2).awakened { transition-delay: 0.35s; }
-            .nav-item:nth-child(3).awakened { transition-delay: 0.7s; }
-            .nav-item:nth-child(4).awakened { transition-delay: 1.05s; }
+            .nav-item:nth-child(2).awakened { transition-delay: 0.45s; }
+            .nav-item:nth-child(3).awakened { transition-delay: 0.9s; }
+            .nav-item:nth-child(4).awakened { transition-delay: 1.35s; }
 
-            /* 关键:把 split 出来的 .letter 全部锁定为最终态 —— 不参与任何动画,
-               不创建合成层,不读 transitionDelay。父级的 opacity 过渡才是唯一的入场。 */
+            /* —— 关键:让字母停在"终点"状态(读 --fx/--fy/--fr),保留 splitLetters
+                  设的手写抖动,但不参与任何字母级动画。Safari 只需要静态渲染。 —— */
             .nav-item .letter,
             .nav-item.awakened .letter {
                 opacity: 1 !important;
-                transform: none !important;
+                /* 读 JS 设好的终点变量 —— 字母依然有 ±2px ±3deg 的不工整感 */
+                transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0) rotate(var(--fr, 0deg)) !important;
                 transition: none !important;
-                will-change: auto !important;
                 transition-delay: 0s !important;
+                will-change: auto !important;
             }
             #level-two { padding: 0; }
             .l2-back { top: 20px; left: 20px; font-size: 13px; }
