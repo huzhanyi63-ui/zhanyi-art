@@ -12546,54 +12546,50 @@
            ==================================================================== */
         @media (max-width: 480px) {
 
-            /* ── 1. Background image: reveal from top-right corner ──
-               Replaces the original mobile rule that disabled the animation
-               entirely. Uses opacity + scale anchored at top-right corner
-               to fake the "diagonal reveal" without depending on
-               mask-position animation (which is unreliable on iOS Safari).
-               The mask is a static radial gradient anchored at top-right
-               so the figure is brightest in the upper-right and fades
-               toward the bottom-left, leaving the left-side text area
-               visually unobstructed. */
+            /* ── 1. Background image — top-right diagonal reveal ──
+               Previous approaches (mask-position keyframe animation,
+               opacity + scale-from-top-right + radial mask) both failed
+               on iOS Safari. This version uses the simplest possible
+               primitive: a 215° linear-gradient mask that slides via a
+               CSS transition on mask-position when body.awakened-soul
+               is added. Same primitive as the desktop @keyframes but
+               driven by transition (more reliable than play-state). */
             #bg-image {
                 background-size: 165% auto !important;
                 background-position: 75% 95% !important;
 
-                /* Static radial mask: opaque in top-right, transparent toward bottom-left.
-                   Ellipse is 130% wide / 130% tall so the opaque region covers
-                   the upper half generously while the lower-left fades out. */
-                -webkit-mask-image:
-                    radial-gradient(ellipse 140% 130% at 100% 0%,
-                        rgba(0,0,0,1) 0%,
-                        rgba(0,0,0,1) 35%,
-                        rgba(0,0,0,0.15) 80%,
-                        rgba(0,0,0,0) 100%) !important;
-                mask-image:
-                    radial-gradient(ellipse 140% 130% at 100% 0%,
-                        rgba(0,0,0,1) 0%,
-                        rgba(0,0,0,1) 35%,
-                        rgba(0,0,0,0.15) 80%,
-                        rgba(0,0,0,0) 100%) !important;
-                -webkit-mask-size: 100% 100% !important;
-                        mask-size: 100% 100% !important;
-                -webkit-mask-position: 0 0 !important;
-                        mask-position: 0 0 !important;
+                -webkit-mask-image: linear-gradient(215deg,
+                    rgba(0,0,0,1) 0%,
+                    rgba(0,0,0,1) 20%,
+                    rgba(0,0,0,0) 55%) !important;
+                mask-image: linear-gradient(215deg,
+                    rgba(0,0,0,1) 0%,
+                    rgba(0,0,0,1) 20%,
+                    rgba(0,0,0,0) 55%) !important;
+
+                -webkit-mask-size: 280% 280% !important;
+                        mask-size: 280% 280% !important;
                 -webkit-mask-repeat: no-repeat !important;
                         mask-repeat: no-repeat !important;
 
-                /* Kill the keyframe animation entirely; replace with a simple
-                   opacity + scale transition triggered by body.awakened-soul. */
+                /* Start position: bottom-left of mask in view = transparent end of gradient = image hidden */
+                -webkit-mask-position: 0% 100% !important;
+                        mask-position: 0% 100% !important;
+
+                transform: scale(1.04);
                 animation: none !important;
-                opacity: 0;
-                transform: scale(1.25);
-                transform-origin: 100% 0%;       /* top-right corner */
+                opacity: 1 !important;
+
                 transition:
-                    opacity 5s cubic-bezier(0.22, 0.61, 0.36, 1) 0.3s,
-                    transform 7s cubic-bezier(0.22, 0.61, 0.36, 1) 0.3s;
+                    -webkit-mask-position 8s cubic-bezier(0.33, 0.05, 0.4, 1) 0.3s,
+                            mask-position 8s cubic-bezier(0.33, 0.05, 0.4, 1) 0.3s,
+                            transform     8s cubic-bezier(0.33, 0.05, 0.4, 1) 0.3s !important;
             }
             body.awakened-soul #bg-image {
-                opacity: 1;
-                transform: scale(1);
+                /* End position: top-right of mask in view = opaque end = image fully revealed */
+                -webkit-mask-position: 100% 0% !important;
+                        mask-position: 100% 0% !important;
+                transform: scale(1) !important;
             }
 
             /* ── 2. Brand identity: keep red flourishes from racing ahead ──
@@ -16163,6 +16159,29 @@
             navItems.forEach((item, idx) => {
                 splitLetters(item.querySelector('.nav-en'), idx * 1.5); splitLetters(item.querySelector('.nav-sub'), idx * 1.5 + 0.4);
             });
+
+            // ── MOBILE LETTER-DRIFT FIX ───────────────────────────────────
+            // splitLetters() above writes --lx = -350~-450px directly into
+            // each letter's inline style. inline style beats any CSS rule,
+            // so previous attempts to override --lx in CSS did nothing.
+            // On a phone the desktop start position is offscreen far enough
+            // that the drift is invisible / janky and looks like letters
+            // "appear one by one". We rescale each inline --lx to a
+            // viewport-appropriate value (-90 to -120px) so the drift is
+            // short, visible, and completes smoothly. We also clamp the
+            // rotation to a saner range (-180 to -360deg instead of -360
+            // to -720deg) — full double-spin is the main cause of jank on
+            // mobile GPUs. timing (--dur, transition-delay) is left alone
+            // so the romantic stagger is preserved exactly. */
+            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                document.querySelectorAll('.nav-item .letter').forEach(span => {
+                    const newLx = -(90 + Math.random() * 30);          // -90 to -120px
+                    const newLr = -(180 + Math.random() * 180);        // -180 to -360deg
+                    span.style.setProperty('--lx', newLx + 'px');
+                    span.style.setProperty('--lr', newLr + 'deg');
+                });
+            }
+            // ──────────────────────────────────────────────────────────────
 
             // --- 第二层级转场 ---
             const illLink = document.getElementById('illustration-link');
