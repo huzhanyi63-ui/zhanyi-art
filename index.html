@@ -1561,15 +1561,16 @@
                 stroke-dasharray: 220;
                 stroke-dashoffset: 220;
             }
-            /* —— 入场两段:先整行文字 opacity 渐显,再下划线 stroke 画出来 —— */
+            /* —— 入场两段:先整行文字 opacity 渐显,再下划线 stroke 画出来 ——
+               延迟拉长(brand 等背景树枝生长到大半再浮现),时长加长。 */
             .brand-mobile.awakened .bm-line {
-                animation: bm-line-in 1.6s ease-out forwards;
+                animation: bm-line-in 3.2s ease-out 3.5s forwards;
             }
             .brand-mobile.awakened .bm-rule {
-                animation: bm-rule-fade 0.5s ease-out 1.5s forwards;
+                animation: bm-rule-fade 0.8s ease-out 5.5s forwards;
             }
             .brand-mobile.awakened .bm-rule path {
-                animation: bm-rule-draw 1.4s cubic-bezier(0.5, 0.05, 0.5, 0.95) 1.5s forwards;
+                animation: bm-rule-draw 2.4s cubic-bezier(0.5, 0.05, 0.5, 0.95) 5.5s forwards;
             }
             @keyframes bm-line-in {
                 from { opacity: 0; }
@@ -1584,18 +1585,55 @@
                 to   { stroke-dashoffset: 0; }
             }
 
-            /* —— 四行 nav:每个 .nav-item 整体 opacity 渐入,stagger 错峰 —— */
+            /* —— 四行 nav:每行从右往左 mask 渐显,延迟拉长,错峰加大 ——
+               -----------------------------------------------------------------
+               实现"从右往左渐显"的方式:
+                 起始态  mask 渐变停在文字右侧外,文字落在透明区 → 完全看不见
+                 终态    mask 滑到文字左侧外,文字落在不透明区 → 完全显现
+               中间过渡时,渐变带从右往左扫过文字,产生"逐字从右浮现"的视觉。
+
+               这里用 mask-position 的百分比驱动 —— 起始 200%(渐变带在文字右外),
+               终态 -100%(渐变带在文字左外)。整条 mask 宽度 = 300% 文字宽,
+               所以这两个位置都能让文字完整地处于"浓端"或"淡端"。
+               
+               关键修复:之前终态 mask-position 用 0%,文字部分还落在渐变带的
+               中段,导致最后看不见。改用 -100% 把渐变带整个滑出左边外侧。 */
             .scattered-nav.ready { visibility: visible; }
             .nav-item {
                 opacity: 0;
-                transition: opacity 1.6s ease;
-                will-change: auto;
+                -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 33%, rgba(0,0,0,1) 66%, rgba(0,0,0,1) 100%);
+                mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 33%, rgba(0,0,0,1) 66%, rgba(0,0,0,1) 100%);
+                -webkit-mask-size: 300% 100%;
+                mask-size: 300% 100%;
+                /* 起始:渐变带定位在文字右外侧 —— 文字被淡端覆盖,完全透明 */
+                -webkit-mask-position: 100% 0%;
+                mask-position: 100% 0%;
+                -webkit-mask-repeat: no-repeat;
+                mask-repeat: no-repeat;
+                transition:
+                    opacity 4.5s cubic-bezier(0.22, 0.61, 0.36, 1),
+                    -webkit-mask-position 4.5s cubic-bezier(0.22, 0.61, 0.36, 1),
+                    mask-position 4.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+                will-change: opacity, mask-position;
             }
-            .nav-item.awakened { opacity: 1; }
-            .nav-item:nth-child(1).awakened { transition-delay: 0.0s; }
-            .nav-item:nth-child(2).awakened { transition-delay: 0.45s; }
-            .nav-item:nth-child(3).awakened { transition-delay: 0.9s; }
-            .nav-item:nth-child(4).awakened { transition-delay: 1.35s; }
+            .nav-item.awakened {
+                opacity: 1;
+                /* 终态:渐变带滑到文字左外侧 —— 文字落在浓端,完全显现 */
+                -webkit-mask-position: -100% 0%;
+                mask-position: -100% 0%;
+            }
+            /* 收尾保险:动画完成后强制清除 mask,避免任何边缘像素问题 —— 同时也
+               让 nav-item 在后续 hover 等交互中不被 mask 影响 */
+            .nav-item.awakened.mask-cleared {
+                -webkit-mask-image: none;
+                mask-image: none;
+            }
+            /* 起步延迟:背景从 0.4s 起 9s 生长。让第一行 4.5s 才开始浮现,
+               之后每行错开 1.2s。整组完成大约在 4.5 + 3*1.2 + 4.5 ≈ 12.6s。 */
+            .nav-item:nth-child(1).awakened { transition-delay: 4.5s; }
+            .nav-item:nth-child(2).awakened { transition-delay: 5.7s; }
+            .nav-item:nth-child(3).awakened { transition-delay: 6.9s; }
+            .nav-item:nth-child(4).awakened { transition-delay: 8.1s; }
 
             /* —— 关键:让字母停在"终点"状态(读 --fx/--fy/--fr),保留 splitLetters
                   设的手写抖动,但不参与任何字母级动画。Safari 只需要静态渲染。 —— */
@@ -1648,11 +1686,13 @@
                nav-item 内部 flex 走向 + brand 下划线对齐方向"。
                ======================================================================== */
 
-            /* —— 品牌名:整块右对齐,下划线也从右往左收 —— */
+            /* —— 品牌名:整块右对齐,下划线也从右往左收,字号缩小避免压图 —— */
             .brand-mobile {
                 /* JS 会动态写入 right & top,覆盖 left 留空避免冲突 */
                 left: auto !important;
                 text-align: right;
+                font-size: 20px !important;     /* 从 26px 降到 20px,不挡背景 */
+                letter-spacing: 0.16em;
             }
             .bm-rule {
                 /* 下划线本来是 margin-left: 4% 起手左对齐 —— 改成靠右 */
@@ -1687,17 +1727,27 @@
                 align-self: flex-end;
                 text-align: right;
             }
+            /* 手机端单独把 nav 字号压小一档(JS 算出来的 22*scale / 11*scale
+               在手机宽 ~390px 时 scale≈0.7,得 ~15/~8;再压一些,留给图像呼吸) */
+            .nav-en { font-size: 14px !important; letter-spacing: 0.08em; }
+            .nav-sub { font-size: 8px !important; letter-spacing: 0.32em; }
+            .nav-item { margin-bottom: 20px; }
 
-            /* —— Footer 链接组:从右下挪到左下偏上 ——
+            /* —— Footer 链接组:从右下挪到左下偏上,改三行纵排 ——
                JS updatePositions() 会动态写 left/bottom,这里覆盖桌面默认的
-               right 定位避免冲突,并把 gap 收紧一点便于左下区域排版。 */
+               right 定位避免冲突。flex-direction: column 把横排改成上下堆叠。
+               同时让它的入场延迟到 nav 收尾之后再浮现,避免抢戏。 */
             .footer-links {
                 right: auto !important;
-                gap: 22px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+                /* 覆盖桌面默认的 transition: opacity 2s ease */
+                transition: opacity 3s ease 9s;
             }
             .footer-links a {
-                /* 在浅色背景的左下区域,链接文字保持可读但不抢眼 */
-                font-size: 9.5px;
+                /* 纵排后字号略大一点(因为不会再被挤),保持优雅 */
+                font-size: 10px;
                 letter-spacing: 0.32em;
             }
         }
@@ -16370,11 +16420,11 @@
                 quote.style.bottom = Math.round(h * 0.06) + 'px';
                 quote.style.left = Math.round(w * 0.045) + 'px';
 
-                // —— Footer 链接:桌面右下;手机移到"左下偏上",落在树枝末端附近的留白 ——
+                // —— Footer 链接:桌面右下;手机改三行纵排,沉到屏幕左下角 ——
                 if (isMobile) {
-                    // 左下偏上:距左 22px,距下大约视口 18% 高(让它浮在屏幕下方约 1/5 处)
+                    // 三行纵排,占用高度更大,贴近底部排
                     footerLinks.style.left = Math.round(w * 0.06) + 'px';
-                    footerLinks.style.bottom = Math.round(h * 0.18) + 'px';
+                    footerLinks.style.bottom = Math.round(h * 0.06) + 'px';
                     footerLinks.style.right = '';   // CSS 里有 right:auto !important
                 } else {
                     footerLinks.style.bottom = Math.round(h * 0.08) + 'px';
@@ -19310,6 +19360,13 @@
                 if (navAwakened) return; navAwakened = true; if (autoNavTimeout) clearTimeout(autoNavTimeout);
                 nav.classList.add('ready'); navItems.forEach(item => item.classList.add('awakened'));
                 setTimeout(() => quote.classList.add('awakened'), 8000);
+                // 手机端 nav 用 mask 从右往左渐显,动画在 12.6s 后完全结束。
+                // 之后清除 mask,杜绝任何边缘渲染问题或 hover 时 mask 被重新触发。
+                if (window.innerWidth < 768) {
+                    setTimeout(() => {
+                        navItems.forEach(item => item.classList.add('mask-cleared'));
+                    }, 13000);
+                }
             }
             
             footerLinks.addEventListener('click', e => e.stopPropagation());
@@ -19367,10 +19424,12 @@
                     if (crossed) return;
                     crossed = true;
 
-                    // Disperse letters to the top-right corner, with jitter + spin.
+                    // Disperse letters to the bottom-right corner, with jitter + spin.
+                    // (Originally went top-right; changed to bottom-right per design intent —
+                    //  the letters "fall away" instead of "rising off".)
                     letters.forEach((l, i) => {
                         const outX = 700 + Math.random() * 400;     // → right
-                        const outY = -500 - Math.random() * 300;    // → up
+                        const outY = 500 + Math.random() * 300;     // → down (was negative for "up")
                         const outR = (Math.random() - 0.3) * 320;
                         l.style.setProperty('--out-x', outX + 'px');
                         l.style.setProperty('--out-y', outY + 'px');
