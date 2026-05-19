@@ -1541,23 +1541,65 @@
         @media (max-width: 768px) {
             #mobile-figs { display: block; }
             /* —— 1. brand-identity 手机独立入场 —— */
-            /* 整体淡入，下划线随父元素一起出现，无独立时序 */
+            /* 【iOS 关键修复】：用 animation 取代 transition。
+               iOS Safari 对 transition + ::after + child <span> 的组合处理时序不稳，
+               会导致 u-mark(子元素，比父大1.18em) 和下划线(::after) 抢在文字之前显现。
+               改用 animation 后，所有子元素严格跟随父元素的 keyframe 时序。 */
             .brand-identity {
                 opacity: 0;
                 visibility: hidden;
                 transform: translateY(-4px);
-                z-index: 20;  /* 手机端：盖在 mobile-figs(z-index:2) 之上 */
-                transition: opacity 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) 0.4s,
-                            transform 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) 0.4s;
+                z-index: 20;
+                transition: none;  /* 关掉电脑端的 transition，防干扰 */
+                animation: brand-fade-in-mobile 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+                animation-play-state: paused;
+            }
+            .brand-identity .u-mark,
+            .brand-identity .dot {
+                opacity: 0;
+                animation: brand-fade-in-mobile 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) 0.1s forwards;
+                animation-play-state: paused;
             }
             .brand-identity::after {
-                /* 下划线和文字同步淡入，不再有 0.4s/0.6s 独立延迟 */
-                transition: opacity 1.8s ease 1.2s, transform 2s ease 1.2s;
+                /* 下划线必须等文字完全到位后才开始绘制。
+                   iOS 上 transition delay 不可靠，用 animation 强制时序。 */
+                transition: none;
+                animation: brand-underline-mobile 1.6s ease 1.8s forwards;
+                animation-play-state: paused;
+            }
+            body.awakened-soul .brand-identity,
+            body.awakened-soul .brand-identity .u-mark,
+            body.awakened-soul .brand-identity .dot,
+            body.awakened-soul .brand-identity::after {
+                animation-play-state: running;
             }
             .brand-identity.awakened {
-                opacity: 1;
                 visibility: visible;
-                transform: translateY(0);
+            }
+            @keyframes brand-fade-in-mobile {
+                0%   { opacity: 0; transform: translateY(-4px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes brand-underline-mobile {
+                0%   { opacity: 0; transform: scaleX(0.3); }
+                100% { opacity: 1; transform: scaleX(1); }
+            }
+
+            /* —— 修复 iOS Safari 底栏遮挡：footer-links / copyright 改用居中、
+               并用 env(safe-area-inset-bottom) 避开 iPhone 底部 home-indicator 与
+               Safari 浮动地址栏。在微信内置浏览器里也兼容（env 不支持就退回到默认值） */
+            .footer-links {
+                left: 0;
+                right: 0;
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+                justify-content: center;
+                padding: 0 8vw;
+                gap: 14px;
+                z-index: 50;  /* 提高层级，确保不被任何后续元素压住 */
+            }
+            .footer-copyright {
+                /* 手机端隐藏版权（已在 480 里处理过；这里仅保险） */
+                display: none;
             }
 
             /* —— 2. 红色小人手机端飘浮组件 —— */
@@ -1581,7 +1623,7 @@
                 filter: drop-shadow(0 2px 6px rgba(160, 101, 74, 0.15));
             }
             /* 6 个小人，沿耳朵位置（屏幕右上角偏下）向左上方蔓延，
-               越往上越小越淡，营造飘散感 */
+               越往上越小越淡，营造飘散感（保留你确认很美的版本） */
             #mobile-figs .mf1 {
                 top: 38%; right: 8%; width: 14%;
                 --o: 0.72; --r: -4deg;
@@ -1617,6 +1659,28 @@
                 --o: 0.42; --r: 12deg;
                 animation: mf-in-b 5.6s ease-out 2.8s forwards,
                            mf-drift-b 16s ease-in-out 7.8s infinite;
+            }
+            /* —— 追加：3 个紧贴耳朵的极小起点，让小人看起来"从耳朵里渗出来"
+               位置都在耳朵正上方/右上方，由小到稍大、由淡到稍浓，
+               入场延迟最早（1.0-1.4s），先于 mf1-mf6，营造"先有源头再蔓延"的视觉因果 */
+            #mobile-figs .mf7 {
+                /* 最贴耳朵 · 最小最淡 · 最早出现 */
+                top: 53%; right: 14%; width: 4%;
+                --o: 0.55; --r: 6deg;
+                animation: mf-in-a 4.5s ease-out 1.0s forwards,
+                           mf-drift-a 13s ease-in-out 6.5s infinite;
+            }
+            #mobile-figs .mf8 {
+                top: 48%; right: 20%; width: 5.5%;
+                --o: 0.62; --r: -8deg;
+                animation: mf-in-b 4.8s ease-out 1.2s forwards,
+                           mf-drift-b 14s ease-in-out 7s infinite;
+            }
+            #mobile-figs .mf9 {
+                top: 44%; right: 16%; width: 4.5%;
+                --o: 0.50; --r: 10deg;
+                animation: mf-in-a 5s ease-out 1.4s forwards,
+                           mf-drift-a 15s ease-in-out 7.2s infinite;
             }
 
             @keyframes mf-in-a {
@@ -12680,6 +12744,9 @@
             <img class="mf mf4" src="images/illu-art/xr4.png" alt="">
             <img class="mf mf5" src="images/illu-art/xr2.png" alt="">
             <img class="mf mf6" src="images/illu-art/xr1.png" alt="">
+            <img class="mf mf7" src="images/illu-art/xr3.png" alt="">
+            <img class="mf mf8" src="images/illu-art/xr4.png" alt="">
+            <img class="mf mf9" src="images/illu-art/xr2.png" alt="">
         </div>
         <div class="noise-overlay"></div>
         <canvas id="particle-canvas"></canvas>
