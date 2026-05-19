@@ -1540,49 +1540,27 @@
 
         @media (max-width: 768px) {
             #mobile-figs { display: block; }
-            /* —— 1. brand-identity 手机独立入场 —— */
-            /* 【iOS 关键修复】：用 animation 取代 transition。
-               iOS Safari 对 transition + ::after + child <span> 的组合处理时序不稳，
-               会导致 u-mark(子元素，比父大1.18em) 和下划线(::after) 抢在文字之前显现。
-               改用 animation 后，所有子元素严格跟随父元素的 keyframe 时序。 */
-            .brand-identity {
+            /* —— 1. brand-identity 手机端保留原版逻辑（与电脑端一致），不再覆写 —— */
+
+            /* —— 2. 导航文字手机端逐字飘入 ——
+               核心思路：iOS Safari 上 animation+delay 远比 transition 稳定。
+               每个 .nav-item 错开 0.25s 整体淡入并轻微上抬，模拟从左到右舒缓飘动。
+               注意：覆盖原 .nav-item 的 transition，让 animation 主导。 */
+            .nav-item {
                 opacity: 0;
-                visibility: hidden;
-                transform: translateY(-4px);
-                z-index: 20;
-                transition: none;  /* 关掉电脑端的 transition，防干扰 */
-                animation: brand-fade-in-mobile 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
-                animation-play-state: paused;
-            }
-            .brand-identity .u-mark,
-            .brand-identity .dot {
-                opacity: 0;
-                animation: brand-fade-in-mobile 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) 0.1s forwards;
-                animation-play-state: paused;
-            }
-            .brand-identity::after {
-                /* 下划线必须等文字完全到位后才开始绘制。
-                   iOS 上 transition delay 不可靠，用 animation 强制时序。 */
+                transform: translateY(8px);
                 transition: none;
-                animation: brand-underline-mobile 1.6s ease 1.8s forwards;
+                animation: nav-fade-in-mobile 1.8s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
                 animation-play-state: paused;
             }
-            body.awakened-soul .brand-identity,
-            body.awakened-soul .brand-identity .u-mark,
-            body.awakened-soul .brand-identity .dot,
-            body.awakened-soul .brand-identity::after {
-                animation-play-state: running;
-            }
-            .brand-identity.awakened {
-                visibility: visible;
-            }
-            @keyframes brand-fade-in-mobile {
-                0%   { opacity: 0; transform: translateY(-4px); }
+            .nav-item:nth-child(1) { animation-delay: 0.0s; }
+            .nav-item:nth-child(2) { animation-delay: 0.35s; }
+            .nav-item:nth-child(3) { animation-delay: 0.7s; }
+            .nav-item:nth-child(4) { animation-delay: 1.05s; }
+            body.awakened-soul .nav-item { animation-play-state: running; }
+            @keyframes nav-fade-in-mobile {
+                0%   { opacity: 0; transform: translateY(8px); }
                 100% { opacity: 1; transform: translateY(0); }
-            }
-            @keyframes brand-underline-mobile {
-                0%   { opacity: 0; transform: scaleX(0.3); }
-                100% { opacity: 1; transform: scaleX(1); }
             }
 
             /* —— 修复 iOS Safari 底栏遮挡：footer-links / copyright 改用居中、
@@ -1622,63 +1600,72 @@
                 will-change: transform, opacity;
                 filter: drop-shadow(0 2px 6px rgba(160, 101, 74, 0.15));
             }
-            /* 6 个小人，沿耳朵位置（屏幕右上角偏下）向左上方蔓延，
-               越往上越小越淡，营造飘散感（保留你确认很美的版本） */
+            /* 严格沿用户画的红线轨迹：
+               起点紧贴耳朵(右下) → 主体几乎垂直向上 → 顶部微微向左收。
+               所有小人都贴右边缘（right 在 4-22% 之间），不跨到画面中部。
+               从下到上：尺寸递减、不透明度递减、间距递增（越往上越稀疏） */
             #mobile-figs .mf1 {
-                top: 38%; right: 8%; width: 14%;
-                --o: 0.72; --r: -4deg;
+                /* 起点 · 紧贴耳朵 · 最大最浓 */
+                top: 52%; right: 5%; width: 13%;
+                --o: 0.72; --r: -3deg;
                 animation: mf-in-a 5s ease-out 1.8s forwards,
                            mf-drift-a 14s ease-in-out 7s infinite;
             }
             #mobile-figs .mf2 {
-                top: 28%; right: 26%; width: 11%;
-                --o: 0.58; --r: 8deg;
+                /* 第二节 · 仍贴右边 · 稍微往上 */
+                top: 44%; right: 8%; width: 11%;
+                --o: 0.62; --r: 5deg;
                 animation: mf-in-b 5.4s ease-out 2.2s forwards,
                            mf-drift-b 16s ease-in-out 7.5s infinite;
             }
             #mobile-figs .mf3 {
-                top: 18%; right: 14%; width: 9%;
-                --o: 0.48; --r: -10deg;
+                /* 第三节 · 红线微微向右弯 · 几乎贴边 */
+                top: 36%; right: 4%; width: 9.5%;
+                --o: 0.54; --r: -6deg;
                 animation: mf-in-a 5.6s ease-out 2.6s forwards,
                            mf-drift-a 15s ease-in-out 8s infinite;
             }
             #mobile-figs .mf4 {
-                top: 12%; right: 34%; width: 7.5%;
-                --o: 0.38; --r: 6deg;
+                /* 第四节 · 顶部开始向左收 */
+                top: 28%; right: 10%; width: 8%;
+                --o: 0.46; --r: 7deg;
                 animation: mf-in-b 5.8s ease-out 3s forwards,
                            mf-drift-b 18s ease-in-out 8.5s infinite;
             }
             #mobile-figs .mf5 {
-                top: 5%; right: 22%; width: 6%;
-                --o: 0.28; --r: -3deg;
+                /* 第五节 · 继续向上 · 间距加大 */
+                top: 19%; right: 16%; width: 6.5%;
+                --o: 0.36; --r: -4deg;
                 animation: mf-in-a 6s ease-out 3.4s forwards,
                            mf-drift-a 17s ease-in-out 9s infinite;
             }
             #mobile-figs .mf6 {
-                top: 48%; right: 38%; width: 8%;
-                --o: 0.42; --r: 12deg;
-                animation: mf-in-b 5.6s ease-out 2.8s forwards,
-                           mf-drift-b 16s ease-in-out 7.8s infinite;
+                /* 顶端 · 最小最淡 · 飘散感 */
+                top: 9%; right: 22%; width: 5%;
+                --o: 0.26; --r: 8deg;
+                animation: mf-in-b 6.2s ease-out 3.8s forwards,
+                           mf-drift-b 18s ease-in-out 9.4s infinite;
             }
-            /* —— 追加：3 个紧贴耳朵的极小起点，让小人看起来"从耳朵里渗出来"
-               位置都在耳朵正上方/右上方，由小到稍大、由淡到稍浓，
-               入场延迟最早（1.0-1.4s），先于 mf1-mf6，营造"先有源头再蔓延"的视觉因果 */
+            /* —— 紧贴耳朵的 3 个极小起点：营造"从耳朵渗出"的源头感
+               这些位置就在 mf1 周围一小簇，模拟刚冒出来的最初一缕 */
             #mobile-figs .mf7 {
-                /* 最贴耳朵 · 最小最淡 · 最早出现 */
-                top: 53%; right: 14%; width: 4%;
+                /* 起点正下方 · 最早出现 · 提示"源头" */
+                top: 58%; right: 9%; width: 3.5%;
                 --o: 0.55; --r: 6deg;
                 animation: mf-in-a 4.5s ease-out 1.0s forwards,
                            mf-drift-a 13s ease-in-out 6.5s infinite;
             }
             #mobile-figs .mf8 {
-                top: 48%; right: 20%; width: 5.5%;
-                --o: 0.62; --r: -8deg;
+                /* 紧贴 mf1 上方 · 略偏右 */
+                top: 48%; right: 13%; width: 4%;
+                --o: 0.50; --r: -7deg;
                 animation: mf-in-b 4.8s ease-out 1.2s forwards,
                            mf-drift-b 14s ease-in-out 7s infinite;
             }
             #mobile-figs .mf9 {
-                top: 44%; right: 16%; width: 4.5%;
-                --o: 0.50; --r: 10deg;
+                /* 起点右侧 · 极小 · 像被推出来的余音 */
+                top: 54%; right: 2%; width: 3%;
+                --o: 0.42; --r: 10deg;
                 animation: mf-in-a 5s ease-out 1.4s forwards,
                            mf-drift-a 15s ease-in-out 7.2s infinite;
             }
