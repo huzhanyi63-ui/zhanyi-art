@@ -1521,6 +1521,125 @@
                 transform: scale(1);
                 -webkit-mask-position: 0% 0%; mask-position: 0% 0%;
                 -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+                /* iOS Safari 兜底：手机端 awaken 触发前完全透明，触发后 4s 缓慢淡入 */
+                opacity: 0;
+                transition: opacity 4s cubic-bezier(0.42, 0.05, 0.5, 0.95);
+            }
+            body.awakened-soul #bg-image { opacity: 1; }
+        }
+
+        /* ========================================================================
+           手机端首页专属增强（仅 ≤768px 生效，电脑端零干扰）
+           1. ZHANYI·HU 标识：用一个简单稳定的整体淡入动画，
+              覆盖电脑端那个会导致"先红线再蹦字"的 iOS 时序 bug。
+           2. 右上角红色小人飘浮：复用 illu-art/xr1-4.png，
+              从背景人物耳朵附近往上蔓延，消解手机端右侧的空白。
+           ======================================================================== */
+        /* 全局默认：mobile-figs 在非手机端完全不渲染 */
+        #mobile-figs { display: none; }
+
+        @media (max-width: 768px) {
+            #mobile-figs { display: block; }
+            /* —— 1. brand-identity 手机独立入场 —— */
+            /* 整体淡入，下划线随父元素一起出现，无独立时序 */
+            .brand-identity {
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(-4px);
+                z-index: 20;  /* 手机端：盖在 mobile-figs(z-index:2) 之上 */
+                transition: opacity 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) 0.4s,
+                            transform 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) 0.4s;
+            }
+            .brand-identity::after {
+                /* 下划线和文字同步淡入，不再有 0.4s/0.6s 独立延迟 */
+                transition: opacity 1.8s ease 1.2s, transform 2s ease 1.2s;
+            }
+            .brand-identity.awakened {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+            }
+
+            /* —— 2. 红色小人手机端飘浮组件 —— */
+            #mobile-figs {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 55%;
+                height: 70%;
+                pointer-events: none;
+                z-index: 2;
+                opacity: 0;
+                transition: opacity 3s ease 1.5s;
+            }
+            body.awakened-soul #mobile-figs { opacity: 1; }
+            #mobile-figs .mf {
+                position: absolute;
+                opacity: 0;
+                transform-origin: center;
+                will-change: transform, opacity;
+                filter: drop-shadow(0 2px 6px rgba(160, 101, 74, 0.15));
+            }
+            /* 6 个小人，沿耳朵位置（屏幕右上角偏下）向左上方蔓延，
+               越往上越小越淡，营造飘散感 */
+            #mobile-figs .mf1 {
+                top: 38%; right: 8%; width: 14%;
+                --o: 0.72; --r: -4deg;
+                animation: mf-in-a 5s ease-out 1.8s forwards,
+                           mf-drift-a 14s ease-in-out 7s infinite;
+            }
+            #mobile-figs .mf2 {
+                top: 28%; right: 26%; width: 11%;
+                --o: 0.58; --r: 8deg;
+                animation: mf-in-b 5.4s ease-out 2.2s forwards,
+                           mf-drift-b 16s ease-in-out 7.5s infinite;
+            }
+            #mobile-figs .mf3 {
+                top: 18%; right: 14%; width: 9%;
+                --o: 0.48; --r: -10deg;
+                animation: mf-in-a 5.6s ease-out 2.6s forwards,
+                           mf-drift-a 15s ease-in-out 8s infinite;
+            }
+            #mobile-figs .mf4 {
+                top: 12%; right: 34%; width: 7.5%;
+                --o: 0.38; --r: 6deg;
+                animation: mf-in-b 5.8s ease-out 3s forwards,
+                           mf-drift-b 18s ease-in-out 8.5s infinite;
+            }
+            #mobile-figs .mf5 {
+                top: 5%; right: 22%; width: 6%;
+                --o: 0.28; --r: -3deg;
+                animation: mf-in-a 6s ease-out 3.4s forwards,
+                           mf-drift-a 17s ease-in-out 9s infinite;
+            }
+            #mobile-figs .mf6 {
+                top: 48%; right: 38%; width: 8%;
+                --o: 0.42; --r: 12deg;
+                animation: mf-in-b 5.6s ease-out 2.8s forwards,
+                           mf-drift-b 16s ease-in-out 7.8s infinite;
+            }
+
+            @keyframes mf-in-a {
+                0%   { opacity: 0; transform: translate(-18px, 24px) rotate(calc(var(--r) - 12deg)) scale(0.9); }
+                60%  { opacity: var(--o); }
+                100% { opacity: var(--o); transform: translate(0, 0) rotate(var(--r)) scale(1); }
+            }
+            @keyframes mf-in-b {
+                0%   { opacity: 0; transform: translate(16px, 28px) rotate(calc(var(--r) + 10deg)) scale(0.92); }
+                55%  { opacity: var(--o); }
+                100% { opacity: var(--o); transform: translate(0, 0) rotate(var(--r)) scale(1); }
+            }
+            @keyframes mf-drift-a {
+                0%, 100% { transform: translate(0, 0) rotate(var(--r)); }
+                30%      { transform: translate(-8px, -12px) rotate(calc(var(--r) + 3deg)); }
+                60%      { transform: translate(6px, -18px) rotate(calc(var(--r) - 2deg)); }
+                85%      { transform: translate(-4px, -6px) rotate(calc(var(--r) + 1deg)); }
+            }
+            @keyframes mf-drift-b {
+                0%, 100% { transform: translate(0, 0) rotate(var(--r)); }
+                25%      { transform: translate(10px, -10px) rotate(calc(var(--r) - 3deg)); }
+                55%      { transform: translate(-6px, -22px) rotate(calc(var(--r) + 4deg)); }
+                80%      { transform: translate(4px, -8px) rotate(calc(var(--r) - 1deg)); }
             }
         }
 
@@ -12553,6 +12672,15 @@
     </svg>
     <div id="viewport">
         <div id="scene-container"><div id="bg-image"></div><div class="vignette"></div></div>
+        <!-- 手机端右上角红色小人飘浮组（仅 ≤768px 显示，电脑端 CSS 不渲染） -->
+        <div id="mobile-figs" aria-hidden="true">
+            <img class="mf mf1" src="images/illu-art/xr1.png" alt="">
+            <img class="mf mf2" src="images/illu-art/xr2.png" alt="">
+            <img class="mf mf3" src="images/illu-art/xr3.png" alt="">
+            <img class="mf mf4" src="images/illu-art/xr4.png" alt="">
+            <img class="mf mf5" src="images/illu-art/xr2.png" alt="">
+            <img class="mf mf6" src="images/illu-art/xr1.png" alt="">
+        </div>
         <div class="noise-overlay"></div>
         <canvas id="particle-canvas"></canvas>
         <div class="ui-layer" id="ui-layer">
