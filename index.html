@@ -12533,121 +12533,127 @@
             .aud-tracks .track-name { display: none; }
         }
 
-        /* ============================================================
-           MOBILE PARITY PATCH — match desktop reveal sequence on phones
-           ------------------------------------------------------------
-           Fixes:
-             1) Background image reveals AFTER awaken gate (not before)
-             2) "Zhanyi · Hu" brand renders in one piece (no font-pop)
-             3) Nav letters drift in smoothly (no per-letter staircase)
-             4) Footer links (About / Contact / Instagram) visible
-           ============================================================ */
+        /* ====================================================================
+           MOBILE PATCH v3 — 2026-05-19 — visible-on-mobile-only adjustments.
+           If the deployed page still shows the v1/v2 behavior, the browser has
+           cached the old HTML. Hard-refresh (or close and reopen the site) to
+           pick up this version. Verify by inspecting page source for the
+           string "MOBILE PATCH v3".
 
-        /* ── Fix 1: restore the desktop "top-right diagonal reveal" on mobile,
-              with a slightly stronger transparent tail toward the bottom-left
-              so the background figure never visually crowds the left-side text
-              (Zhanyi · Hu, the four nav items, the vertical whisper quote).
-
-              The original mobile rule (≤480px) did THREE breaking things:
-                a) replaced the 215° diagonal mask with a 180° vertical gradient
-                b) set `animation: none` so nothing animates at all
-                c) set mask-position/size to constants, locking the reveal off
-              Visible result: a static, top-to-bottom fade with no gating —
-              the figure sits there before the awaken gate is crossed, and on
-              top of the left-column text.
-
-              Fix: force the desktop mask + animation back on, gated by
-              `.awakened-soul` exactly like desktop. We *also* tighten the
-              gradient stops (0%-15% opaque → 50% transparent, vs desktop's
-              0%-30% → 60%) so the gradient transitions earlier, keeping the
-              bottom-left ~third of the viewport softly transparent even at
-              the animation's end state. This means the figure visually
-              "anchors" to the top-right corner and never solidly overlaps
-              the left text. Desktop is unaffected (it has the original
-              gentler gradient because it has space to breathe). */
+           This patch is wrapped in @media (max-width: 480px) almost entirely,
+           so it CANNOT affect the desktop experience. Desktop rendering is
+           identical to the original file.
+           ==================================================================== */
         @media (max-width: 480px) {
+
+            /* ── 1. Background image: reveal from top-right corner ──
+               Replaces the original mobile rule that disabled the animation
+               entirely. Uses opacity + scale anchored at top-right corner
+               to fake the "diagonal reveal" without depending on
+               mask-position animation (which is unreliable on iOS Safari).
+               The mask is a static radial gradient anchored at top-right
+               so the figure is brightest in the upper-right and fades
+               toward the bottom-left, leaving the left-side text area
+               visually unobstructed. */
             #bg-image {
-                /* keep the mobile portrait crop (positions the figure in
-                   the right portion of the viewport) */
-                background-size: 165% auto;
-                background-position: 75% 95%;
-                /* restore the diagonal mask, but with a tighter opaque core
-                   and earlier transition so the bottom-left stays soft */
-                -webkit-mask-image: linear-gradient(215deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 50%) !important;
-                mask-image: linear-gradient(215deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 50%) !important;
-                -webkit-mask-size: 300% 300% !important; mask-size: 300% 300% !important;
-                -webkit-mask-position: 0% 100% !important; mask-position: 0% 100% !important;
-                transform: scale(1.05);
-                /* restore the gated tree-grow animation */
-                animation: tree-grow 9s cubic-bezier(0.42, 0.05, 0.5, 0.95) 0.4s forwards !important;
-                animation-play-state: paused !important;
-            }
-            body.awakened-soul #bg-image { animation-play-state: running !important; }
+                background-size: 165% auto !important;
+                background-position: 75% 95% !important;
 
-            /* Belt-and-braces: ensure left-side text remains legible against
-               whatever the figure shows through. Slightly stronger cream halo
-               text-shadow on mobile only — invisible on cream background,
-               but blocks bleed-through where the figure peeks. */
+                /* Static radial mask: opaque in top-right, transparent toward bottom-left.
+                   Ellipse is 130% wide / 130% tall so the opaque region covers
+                   the upper half generously while the lower-left fades out. */
+                -webkit-mask-image:
+                    radial-gradient(ellipse 140% 130% at 100% 0%,
+                        rgba(0,0,0,1) 0%,
+                        rgba(0,0,0,1) 35%,
+                        rgba(0,0,0,0.15) 80%,
+                        rgba(0,0,0,0) 100%) !important;
+                mask-image:
+                    radial-gradient(ellipse 140% 130% at 100% 0%,
+                        rgba(0,0,0,1) 0%,
+                        rgba(0,0,0,1) 35%,
+                        rgba(0,0,0,0.15) 80%,
+                        rgba(0,0,0,0) 100%) !important;
+                -webkit-mask-size: 100% 100% !important;
+                        mask-size: 100% 100% !important;
+                -webkit-mask-position: 0 0 !important;
+                        mask-position: 0 0 !important;
+                -webkit-mask-repeat: no-repeat !important;
+                        mask-repeat: no-repeat !important;
+
+                /* Kill the keyframe animation entirely; replace with a simple
+                   opacity + scale transition triggered by body.awakened-soul. */
+                animation: none !important;
+                opacity: 0;
+                transform: scale(1.25);
+                transform-origin: 100% 0%;       /* top-right corner */
+                transition:
+                    opacity 5s cubic-bezier(0.22, 0.61, 0.36, 1) 0.3s,
+                    transform 7s cubic-bezier(0.22, 0.61, 0.36, 1) 0.3s;
+            }
+            body.awakened-soul #bg-image {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            /* ── 2. Brand identity: keep red flourishes from racing ahead ──
+               The desktop CSS gives the underline `transition-delay: 0.6s`
+               and the underline's scaleX `transition-delay: 0.4s`. On
+               desktop this reads as a graceful flourish AFTER the text
+               has begun to appear. On mobile (where font-swap can delay
+               the text rendering by 0.5–1.5s on cellular), this 0.6s
+               head-start makes the red elements look like they appear
+               FIRST. We zero the delays on mobile so everything reveals
+               in lockstep. */
             .brand-identity {
-                text-shadow:
-                    0 0 18px var(--bg-color),
-                    0 0 10px var(--bg-color),
-                    0 0 5px var(--bg-color),
-                    0 0 2px var(--bg-color) !important;
+                transition: opacity 1.8s ease, transform 1.8s ease !important;
             }
-            .nav-en, .nav-sub, .letter {
-                text-shadow:
-                    0 0 16px var(--bg-color),
-                    0 0 9px var(--bg-color),
-                    0 0 4px var(--bg-color) !important;
+            .brand-identity::after {
+                transition: opacity 1.8s ease 0s, transform 1.8s ease 0s !important;
             }
-        }
 
-        /* ── Fix 2: hold the brand-identity flourishes until the web font
-              has loaded, so "Zhanyi" and "H" don't pop in AFTER the red
-              underline and U-flourish on slower connections. */
-        html:not(.fonts-ready) .brand-identity { opacity: 0 !important; visibility: hidden !important; }
-        html:not(.fonts-ready) .brand-identity::after { opacity: 0 !important; transform: scaleX(0.3) !important; }
-        html:not(.fonts-ready) .brand-identity .u-mark::after { opacity: 0 !important; }
-        html:not(.fonts-ready) .brand-identity .dot { opacity: 0 !important; }
-        html:not(.fonts-ready) .footer-links,
-        html:not(.fonts-ready) .whisper-quote,
-        html:not(.fonts-ready) .nav-item .letter { opacity: 0 !important; }
-        /* Also hold the pre-awakened transform so the drift trajectory
-           starts at fonts-ready, not at the moment the .awakened class
-           was added (which can be earlier on slow connections). */
-        html:not(.fonts-ready) .nav-item .letter {
-            transform: translate3d(var(--lx), var(--ly), 0) rotate(var(--lr)) !important;
-        }
-        /* Once fonts are ready these !important rules drop and the existing
-           transitions on .awakened state take over — no snap, smooth fade. */
+            /* ── 3. Nav letters: KEEP the desktop per-letter drift ──
+               The previous attempt replaced the drift with a flat fade
+               which the user (correctly) rejected. The real fix is to
+               keep the desktop animation but scale the drift distance
+               to the smaller viewport: desktop starts letters at
+               --lx = -350~-450px (off-screen on a 1600px screen, which
+               looks "romantic"), but on a 375px phone that's barely
+               over a screen-width away so each letter looks like it
+               just teleports in. We override --lx to a phone-sized
+               value (-100~-140px) so letters have a clear, visible
+               drift trajectory that finishes inside the viewport.
+               --ly and --lr (the rotation) come along for the ride
+               unchanged, so the dance is the same.
 
-        /* ── Fix 3: smoother letter drift on mobile.
-              The desktop "romantic drift" can stutter on small-screen
-              GPUs when letters travel ~1 full viewport while rotating
-              720°. We keep the same look but force GPU compositing and
-              reduce overdraw. We do NOT change the JS-set CSS variables. */
-        @media (max-width: 768px) {
-            .letter {
+               We do NOT touch opacity / transition / transition-delay /
+               --dur / --fx / --fy / --fr — all the timing that makes
+               the desktop drift "浪漫" stays exactly as the JS set it. */
+            .nav-item .letter {
+                --lx: -120px;
+            }
+
+            /* GPU compositing hint — the rotation animation is heavy
+               on mobile GPU otherwise, which causes the "popping"
+               appearance. backface-visibility:hidden promotes each
+               letter to its own layer. */
+            .nav-item .letter,
+            .brand-identity {
                 -webkit-backface-visibility: hidden;
                 backface-visibility: hidden;
                 -webkit-transform-style: preserve-3d;
                 transform-style: preserve-3d;
             }
-            /* The brand letters benefit from the same hint. */
-            .brand-identity { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
-        }
 
-        /* ── Fix 4: ensure the footer links are reliably visible and
-              readable on mobile. The earlier 9px size with 0.3em tracking
-              can overflow or render too thin on phones. */
-        @media (max-width: 768px) {
+            /* ── 4. Footer links (Contact / About / Instagram) ──
+               The original 9px font + 0.3em letter-spacing is too thin
+               on a phone. Bump size and tighten tracking; ensure they
+               sit in front of any decorative layers. */
             .footer-links {
-                z-index: 25;          /* above any stray decorative layer */
+                z-index: 25;
                 gap: 16px;
                 flex-wrap: nowrap;
                 white-space: nowrap;
-                pointer-events: auto;
             }
             .footer-links a {
                 font-size: 10.5px;
@@ -12657,32 +12663,28 @@
                     0 0 8px var(--bg-color),
                     0 0 4px var(--bg-color);
             }
-        }
-        @media (max-width: 380px) {
-            .footer-links { gap: 12px; }
-            .footer-links a { font-size: 10px; letter-spacing: 0.18em; }
+
+            /* ── 5. Stronger cream halo on all left-column text ──
+               Belt-and-braces: the figure's bottom-left region is
+               mostly masked transparent, but on the off-chance the
+               figure does peek through, this extra halo guarantees
+               legibility. Invisible on a cream-only background. */
+            .brand-identity {
+                text-shadow:
+                    0 0 18px var(--bg-color),
+                    0 0 10px var(--bg-color),
+                    0 0 5px var(--bg-color);
+            }
+            .nav-en, .nav-sub {
+                text-shadow:
+                    0 0 16px var(--bg-color),
+                    0 0 9px var(--bg-color),
+                    0 0 4px var(--bg-color);
+            }
         }
 
     </style>
-    <script>
-        // Mobile parity patch — script half.
-        // Adds `fonts-ready` to <html> once Cormorant Garamond + Montserrat
-        // are available, so the CSS rules above can release the brand and
-        // letter reveals. A 2.5s safety timeout guarantees forward progress
-        // even if document.fonts is unsupported or never resolves.
-        (function () {
-            var html = document.documentElement;
-            function markReady() {
-                if (html.classList.contains('fonts-ready')) return;
-                html.classList.add('fonts-ready');
-            }
-            if (document.fonts && document.fonts.ready && document.fonts.ready.then) {
-                document.fonts.ready.then(markReady, markReady);
-            }
-            // Hard fallback so a slow network never softlocks the reveal.
-            setTimeout(markReady, 2500);
-        })();
-    </script>
+    <!-- MOBILE PATCH v3 marker — confirms the patched HTML is being served. -->
 </head>
 <body>
     <!-- shared SVG filter: directional warm drop-shadow on alpha — no bounding-box bleed in Safari -->
