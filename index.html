@@ -48,20 +48,12 @@
             -webkit-mask-size: 300% 300%; mask-size: 300% 300%;
             -webkit-mask-position: 0% 100%; mask-position: 0% 100%;
             transform: scale(1.05);
-            will-change: mask-position, transform, opacity;
+            will-change: mask-position, transform;
             /* 【修复】：恢复我们打磨好的优雅、缓慢的入场动画曲线，而不是飞速闪现 */
             animation: tree-grow 9s cubic-bezier(0.42, 0.05, 0.5, 0.95) 0.4s forwards;
             animation-play-state: paused;   /* held until #awaken-gate is crossed */
-            /* iOS Safari fix — opacity gate ensures the figure is truly invisible
-               before awaken click, regardless of how Safari renders mask-position
-               on a paused animation. */
-            opacity: 0;
-            transition: opacity 1.4s ease;
         }
-        body.awakened-soul #bg-image {
-            animation-play-state: running;
-            opacity: 1;
-        }
+        body.awakened-soul #bg-image { animation-play-state: running; }
 
         @keyframes tree-grow {
             0% { -webkit-mask-position: 0% 100%; mask-position: 0% 100%; transform: scale(1.05); }
@@ -159,12 +151,7 @@
             opacity: 0;
             transform: scaleX(0.3);
             transform-origin: left center;
-            /* 【iOS 修复】：下划线必须严格等文字淡入完毕（2s）之后再开始绘制，
-               否则 iOS Safari 会把伪元素提前渲染出来，造成"先画线再出文字"的丑陋顺序。
-               这里下划线延迟 2.2s 才开始 fade-in，保证 ZHANYI·HU 已经完全显现。 */
-            transition: opacity 1.4s ease 2.2s, transform 1.8s ease 2.2s;
-            /* 强制 iOS 把伪元素独立合成，避免它跟父元素分开渲染时序错乱 */
-            will-change: opacity, transform;
+            transition: opacity 1.6s ease 0.6s, transform 1.8s ease 0.4s;
         }
         .brand-identity.awakened { opacity: 1; visibility: visible; transform: translateY(0); }
         .brand-identity.awakened::after { opacity: 1; transform: scaleX(1); }
@@ -1526,12 +1513,10 @@
             .footer-links { gap: 14px; }
             .footer-copyright { display: none; }
             #bg-image {
-                /* 【手机端构图】：人物主体推到屏幕右上角外侧，只保留发丝/枝桠
-                   从右上角探入，左侧文字（ZHANYI·HU + 导航）完全不被遮挡。 */
-                background-size: 150% auto;
-                background-position: 115% -8%;
-                -webkit-mask-image: linear-gradient(225deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 28%, rgba(0,0,0,0) 62%);
-                mask-image: linear-gradient(225deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 28%, rgba(0,0,0,0) 62%);
+                background-size: 165% auto;
+                background-position: 75% 95%;
+                -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 38%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%);
+                mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 38%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%);
                 animation: none;
                 transform: scale(1);
                 -webkit-mask-position: 0% 0%; mask-position: 0% 0%;
@@ -12548,7 +12533,156 @@
             .aud-tracks .track-name { display: none; }
         }
 
+        /* ============================================================
+           MOBILE PARITY PATCH — match desktop reveal sequence on phones
+           ------------------------------------------------------------
+           Fixes:
+             1) Background image reveals AFTER awaken gate (not before)
+             2) "Zhanyi · Hu" brand renders in one piece (no font-pop)
+             3) Nav letters drift in smoothly (no per-letter staircase)
+             4) Footer links (About / Contact / Instagram) visible
+           ============================================================ */
+
+        /* ── Fix 1: restore the desktop "top-right diagonal reveal" on mobile,
+              with a slightly stronger transparent tail toward the bottom-left
+              so the background figure never visually crowds the left-side text
+              (Zhanyi · Hu, the four nav items, the vertical whisper quote).
+
+              The original mobile rule (≤480px) did THREE breaking things:
+                a) replaced the 215° diagonal mask with a 180° vertical gradient
+                b) set `animation: none` so nothing animates at all
+                c) set mask-position/size to constants, locking the reveal off
+              Visible result: a static, top-to-bottom fade with no gating —
+              the figure sits there before the awaken gate is crossed, and on
+              top of the left-column text.
+
+              Fix: force the desktop mask + animation back on, gated by
+              `.awakened-soul` exactly like desktop. We *also* tighten the
+              gradient stops (0%-15% opaque → 50% transparent, vs desktop's
+              0%-30% → 60%) so the gradient transitions earlier, keeping the
+              bottom-left ~third of the viewport softly transparent even at
+              the animation's end state. This means the figure visually
+              "anchors" to the top-right corner and never solidly overlaps
+              the left text. Desktop is unaffected (it has the original
+              gentler gradient because it has space to breathe). */
+        @media (max-width: 480px) {
+            #bg-image {
+                /* keep the mobile portrait crop (positions the figure in
+                   the right portion of the viewport) */
+                background-size: 165% auto;
+                background-position: 75% 95%;
+                /* restore the diagonal mask, but with a tighter opaque core
+                   and earlier transition so the bottom-left stays soft */
+                -webkit-mask-image: linear-gradient(215deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 50%) !important;
+                mask-image: linear-gradient(215deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 50%) !important;
+                -webkit-mask-size: 300% 300% !important; mask-size: 300% 300% !important;
+                -webkit-mask-position: 0% 100% !important; mask-position: 0% 100% !important;
+                transform: scale(1.05);
+                /* restore the gated tree-grow animation */
+                animation: tree-grow 9s cubic-bezier(0.42, 0.05, 0.5, 0.95) 0.4s forwards !important;
+                animation-play-state: paused !important;
+            }
+            body.awakened-soul #bg-image { animation-play-state: running !important; }
+
+            /* Belt-and-braces: ensure left-side text remains legible against
+               whatever the figure shows through. Slightly stronger cream halo
+               text-shadow on mobile only — invisible on cream background,
+               but blocks bleed-through where the figure peeks. */
+            .brand-identity {
+                text-shadow:
+                    0 0 18px var(--bg-color),
+                    0 0 10px var(--bg-color),
+                    0 0 5px var(--bg-color),
+                    0 0 2px var(--bg-color) !important;
+            }
+            .nav-en, .nav-sub, .letter {
+                text-shadow:
+                    0 0 16px var(--bg-color),
+                    0 0 9px var(--bg-color),
+                    0 0 4px var(--bg-color) !important;
+            }
+        }
+
+        /* ── Fix 2: hold the brand-identity flourishes until the web font
+              has loaded, so "Zhanyi" and "H" don't pop in AFTER the red
+              underline and U-flourish on slower connections. */
+        html:not(.fonts-ready) .brand-identity { opacity: 0 !important; visibility: hidden !important; }
+        html:not(.fonts-ready) .brand-identity::after { opacity: 0 !important; transform: scaleX(0.3) !important; }
+        html:not(.fonts-ready) .brand-identity .u-mark::after { opacity: 0 !important; }
+        html:not(.fonts-ready) .brand-identity .dot { opacity: 0 !important; }
+        html:not(.fonts-ready) .footer-links,
+        html:not(.fonts-ready) .whisper-quote,
+        html:not(.fonts-ready) .nav-item .letter { opacity: 0 !important; }
+        /* Also hold the pre-awakened transform so the drift trajectory
+           starts at fonts-ready, not at the moment the .awakened class
+           was added (which can be earlier on slow connections). */
+        html:not(.fonts-ready) .nav-item .letter {
+            transform: translate3d(var(--lx), var(--ly), 0) rotate(var(--lr)) !important;
+        }
+        /* Once fonts are ready these !important rules drop and the existing
+           transitions on .awakened state take over — no snap, smooth fade. */
+
+        /* ── Fix 3: smoother letter drift on mobile.
+              The desktop "romantic drift" can stutter on small-screen
+              GPUs when letters travel ~1 full viewport while rotating
+              720°. We keep the same look but force GPU compositing and
+              reduce overdraw. We do NOT change the JS-set CSS variables. */
+        @media (max-width: 768px) {
+            .letter {
+                -webkit-backface-visibility: hidden;
+                backface-visibility: hidden;
+                -webkit-transform-style: preserve-3d;
+                transform-style: preserve-3d;
+            }
+            /* The brand letters benefit from the same hint. */
+            .brand-identity { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+        }
+
+        /* ── Fix 4: ensure the footer links are reliably visible and
+              readable on mobile. The earlier 9px size with 0.3em tracking
+              can overflow or render too thin on phones. */
+        @media (max-width: 768px) {
+            .footer-links {
+                z-index: 25;          /* above any stray decorative layer */
+                gap: 16px;
+                flex-wrap: nowrap;
+                white-space: nowrap;
+                pointer-events: auto;
+            }
+            .footer-links a {
+                font-size: 10.5px;
+                letter-spacing: 0.22em;
+                text-shadow:
+                    0 0 14px var(--bg-color),
+                    0 0 8px var(--bg-color),
+                    0 0 4px var(--bg-color);
+            }
+        }
+        @media (max-width: 380px) {
+            .footer-links { gap: 12px; }
+            .footer-links a { font-size: 10px; letter-spacing: 0.18em; }
+        }
+
     </style>
+    <script>
+        // Mobile parity patch — script half.
+        // Adds `fonts-ready` to <html> once Cormorant Garamond + Montserrat
+        // are available, so the CSS rules above can release the brand and
+        // letter reveals. A 2.5s safety timeout guarantees forward progress
+        // even if document.fonts is unsupported or never resolves.
+        (function () {
+            var html = document.documentElement;
+            function markReady() {
+                if (html.classList.contains('fonts-ready')) return;
+                html.classList.add('fonts-ready');
+            }
+            if (document.fonts && document.fonts.ready && document.fonts.ready.then) {
+                document.fonts.ready.then(markReady, markReady);
+            }
+            // Hard fallback so a slow network never softlocks the reveal.
+            setTimeout(markReady, 2500);
+        })();
+    </script>
 </head>
 <body>
     <!-- shared SVG filter: directional warm drop-shadow on alpha — no bounding-box bleed in Safari -->
@@ -19765,14 +19899,12 @@
         window.__startAmbientAudio = function () {
             if (started || muted) return;
             started = true;
-            // 【iOS Safari 修复】：play() 必须在用户点击的同步调用栈内立刻触发，
-            // 任何延迟（setTimeout / await）都会被 iOS 视为非用户手势而拒绝播放。
-            // 所以这里：立即开始播放（静音状态），再延迟启动 fade-in 音量曲线。
-            audio.volume = 0;
-            const p = audio.play();
-            if (p && p.catch) p.catch(()=>{});
+            // Brief delay so letters lift off before the music begins.
             setTimeout(() => {
                 if (muted) return;
+                audio.volume = 0;
+                const p = audio.play();
+                if (p && p.catch) p.catch(()=>{});
                 fadeIn();
             }, INTRO_DELAY_MS);
         };
