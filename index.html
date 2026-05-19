@@ -1506,49 +1506,54 @@
                 font-family: 'Cormorant Garamond', serif;
                 font-style: italic;
                 font-weight: 300;
-                font-size: 44px;
-                letter-spacing: 0.20em;
-                text-transform: uppercase;
+                font-size: 26px;        /* 跟桌面端 brand 的 JS 计算值匹配 */
+                letter-spacing: 0.18em;
                 color: var(--primary-color);
                 line-height: 1;
                 white-space: nowrap;
                 -webkit-font-smoothing: antialiased;
                 z-index: 20;
                 pointer-events: none;
-                /* 默认隐藏。.awakened 加上后两段式入场跑起来 */
+                /* 默认隐藏 */
                 opacity: 0;
                 visibility: hidden;
             }
             .brand-mobile.awakened {
                 visibility: visible;
-                /* opacity 由内部 .bm-text 的 keyframes 推动,容器本身保持 opacity:1 */
                 opacity: 1;
             }
-            .bm-text {
+            /* 整行文字:所有字符是兄弟 span,共享同一个 opacity 关键帧 —— Safari 无嵌套
+               时序问题 */
+            .bm-line {
                 display: inline-block;
                 opacity: 0;
                 text-shadow: 0 0 14px var(--bg-color), 0 0 7px var(--bg-color);
             }
-            .bm-dot {
+            .bm-c {
                 display: inline-block;
-                width: 2px; height: 2px;
-                background: var(--highlight-color);
-                border-radius: 50%;
-                margin: 0 0.32em 0.28em;
-                vertical-align: middle;
-                opacity: 0.55;
+                font-style: italic;
+                /* 文本被 text-transform: uppercase 显示,但我们已经直接写大写以保险 */
             }
-            .bm-u {
+            /* U:红色,跟桌面 .u-mark 一致,但字号不变(扁平嵌套问题就消失) */
+            .bm-u-c {
                 color: var(--highlight-color);
-                font-size: 1.12em;
             }
-            /* SVG 下划线:藏在 bm-text 下方,默认 stroke 没画 */
+            /* 中间的红色分隔点(用 · 字符承载,不靠空 span+background) */
+            .bm-dot-c {
+                color: var(--highlight-color);
+                font-style: normal;
+                font-size: 0.5em;
+                vertical-align: 0.35em;
+                margin: 0 0.15em;
+                opacity: 0.65;
+            }
+            /* SVG 下划线 */
             .bm-rule {
                 display: block;
-                width: 80%;
+                width: 78%;
                 height: 6px;
-                margin-top: 6px;
-                margin-left: 6%;
+                margin-top: 4px;
+                margin-left: 4%;
                 opacity: 0;
                 overflow: visible;
             }
@@ -1556,17 +1561,17 @@
                 stroke-dasharray: 220;
                 stroke-dashoffset: 220;
             }
-            /* —— 入场两段:先文字,后下划线。awaken gate 触发 .awakened 时跑 —— */
-            .brand-mobile.awakened .bm-text {
-                animation: bm-text-in 1.4s ease-out forwards;
+            /* —— 入场两段:先整行文字 opacity 渐显,再下划线 stroke 画出来 —— */
+            .brand-mobile.awakened .bm-line {
+                animation: bm-line-in 1.6s ease-out forwards;
             }
             .brand-mobile.awakened .bm-rule {
-                animation: bm-rule-fade 0.4s ease-out 1.2s forwards;
+                animation: bm-rule-fade 0.5s ease-out 1.5s forwards;
             }
             .brand-mobile.awakened .bm-rule path {
-                animation: bm-rule-draw 1.2s cubic-bezier(0.5, 0.05, 0.5, 0.95) 1.2s forwards;
+                animation: bm-rule-draw 1.4s cubic-bezier(0.5, 0.05, 0.5, 0.95) 1.5s forwards;
             }
-            @keyframes bm-text-in {
+            @keyframes bm-line-in {
                 from { opacity: 0; }
                 to   { opacity: 1; }
             }
@@ -12796,11 +12801,11 @@
         <canvas id="particle-canvas"></canvas>
         <div class="ui-layer" id="ui-layer">
             <div class="brand-identity" id="brand">Zhanyi<span class="dot"></span>H<span class="u-mark">u</span></div>
-            <!-- 手机端专用品牌:完全独立的元素,桌面端 display:none。两段式入场:
-                 先文字 opacity 渐显,再 SVG 下划线 stroke-dashoffset 画出来。不依赖
-                 桌面端那套 .awakened class 上的 transform/transition —— Safari 安全。 -->
+            <!-- 手机端专用品牌:扁平结构,所有字符在同一层级渲染,opacity 关键帧时序一致 -->
             <div class="brand-mobile" id="brand-mobile" aria-hidden="true">
-                <span class="bm-text">Zhanyi<span class="bm-dot"></span>H<span class="bm-u">u</span></span>
+                <span class="bm-line">
+                    <span class="bm-c">Z</span><span class="bm-c">H</span><span class="bm-c">A</span><span class="bm-c">N</span><span class="bm-c">Y</span><span class="bm-c">I</span><span class="bm-c bm-dot-c">·</span><span class="bm-c">H</span><span class="bm-c bm-u-c">U</span>
+                </span>
                 <svg class="bm-rule" viewBox="0 0 200 8" preserveAspectRatio="none" aria-hidden="true">
                     <path d="M2,5 C 28,2.6 60,6.4 96,3.6 S 158,6.2 198,3" fill="none" stroke="#a0654a" stroke-width="1.1" stroke-linecap="round"/>
                     <path d="M6,5.6 C 42,4.1 78,6.1 122,4.5 S 172,6.3 196,4.4" fill="none" stroke="#a0654a" stroke-width="0.5" stroke-linecap="round" opacity="0.55"/>
@@ -16175,26 +16180,30 @@
         function startApp() {
             const brand = document.getElementById('brand'), nav = document.getElementById('nav'), navItems = document.querySelectorAll('.nav-item');
             const brandMobile = document.getElementById('brand-mobile');
-            // —— 手机端品牌镜像 —— 不去改 10+ 处现有 brand 操作点,用 MutationObserver
-            // 把 brand 的 opacity 和 .awakened 类自动同步到 #brand-mobile。
-            // CSS @media (max-width:768px) 控制 brandMobile 是否真的显示出来,桌面端
-            // 它一直 display:none,这段同步对桌面无任何视觉影响。
+            // —— 手机端品牌镜像 ——
+            // 用 MutationObserver,但只同步 class(awakened 一次性触发关键帧)。
+            // opacity 用单独的 RAF 轮询同步,避免监听 style 时被 updatePositions() 的
+            // top/left/fontSize 改动反复触发(那些跟 brandMobile 的视觉无关)。
+            // 桌面端 brandMobile 一直 display:none,这段对桌面零影响。
             if (brandMobile && brand) {
-                const syncBrandMobile = () => {
-                    // opacity:跟随 brand 的 inline opacity(返回 home/进入子页面时会被 JS 直接设 0/1)
-                    if (brand.style.opacity !== '') {
-                        brandMobile.style.opacity = brand.style.opacity;
+                let lastOpacity = '';
+                const syncOpacity = () => {
+                    const op = brand.style.opacity;
+                    if (op !== lastOpacity) {
+                        lastOpacity = op;
+                        if (op !== '') brandMobile.style.opacity = op;
                     }
-                    // awakened 类:首次入场动画触发器
-                    if (brand.classList.contains('awakened')) {
-                        brandMobile.classList.add('awakened');
-                    } else {
-                        brandMobile.classList.remove('awakened');
-                    }
+                    requestAnimationFrame(syncOpacity);
                 };
-                new MutationObserver(syncBrandMobile).observe(brand, {
-                    attributes: true, attributeFilter: ['style', 'class']
-                });
+                requestAnimationFrame(syncOpacity);
+                // class 同步:只关心 awakened 是否在 brand 上。加一次后不再 remove,
+                // 这样关键帧 forwards 状态稳定,不会被反复重启。
+                new MutationObserver(() => {
+                    if (brand.classList.contains('awakened') &&
+                        !brandMobile.classList.contains('awakened')) {
+                        brandMobile.classList.add('awakened');
+                    }
+                }).observe(brand, { attributes: true, attributeFilter: ['class'] });
             }
             const quote = document.getElementById('quote'), footerLinks = document.getElementById('footer-links'), viewport = document.getElementById('viewport');
             const audioToggle = document.getElementById('audio-toggle');
