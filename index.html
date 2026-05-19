@@ -1562,15 +1562,15 @@
                 stroke-dashoffset: 220;
             }
             /* —— 入场两段:先整行文字 opacity 渐显,再下划线 stroke 画出来 ——
-               延迟拉长(brand 等背景树枝生长到大半再浮现),时长加长。 */
+               延迟很短(几乎立刻开始),但 opacity 时长加长,让浮现非常柔和。 */
             .brand-mobile.awakened .bm-line {
-                animation: bm-line-in 3.2s ease-out 3.5s forwards;
+                animation: bm-line-in 3.2s ease-out 0s forwards;
             }
             .brand-mobile.awakened .bm-rule {
-                animation: bm-rule-fade 0.8s ease-out 5.5s forwards;
+                animation: bm-rule-fade 0.8s ease-out 2.5s forwards;
             }
             .brand-mobile.awakened .bm-rule path {
-                animation: bm-rule-draw 2.4s cubic-bezier(0.5, 0.05, 0.5, 0.95) 5.5s forwards;
+                animation: bm-rule-draw 2.4s cubic-bezier(0.5, 0.05, 0.5, 0.95) 2.5s forwards;
             }
             @keyframes bm-line-in {
                 from { opacity: 0; }
@@ -1628,12 +1628,13 @@
                 -webkit-mask-image: none;
                 mask-image: none;
             }
-            /* 起步延迟:背景从 0.4s 起 9s 生长。让第一行 4.5s 才开始浮现,
-               之后每行错开 1.2s。整组完成大约在 4.5 + 3*1.2 + 4.5 ≈ 12.6s。 */
-            .nav-item:nth-child(1).awakened { transition-delay: 4.5s; }
-            .nav-item:nth-child(2).awakened { transition-delay: 5.7s; }
-            .nav-item:nth-child(3).awakened { transition-delay: 6.9s; }
-            .nav-item:nth-child(4).awakened { transition-delay: 8.1s; }
+            /* 起步延迟:点击 awaken 后几乎立刻开始浮现,不留死寂期。
+               单行 transition 仍然 4.5s,渐显本身很缓慢柔和;
+               行间错峰 1.2s,四行依次接力,整组到 ~9.1s 完全清晰。 */
+            .nav-item:nth-child(1).awakened { transition-delay: 0.5s; }
+            .nav-item:nth-child(2).awakened { transition-delay: 1.7s; }
+            .nav-item:nth-child(3).awakened { transition-delay: 2.9s; }
+            .nav-item:nth-child(4).awakened { transition-delay: 4.1s; }
 
             /* —— 关键:让字母停在"终点"状态(读 --fx/--fy/--fr),保留 splitLetters
                   设的手写抖动,但不参与任何字母级动画。Safari 只需要静态渲染。 —— */
@@ -1742,8 +1743,10 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 14px;
-                /* 覆盖桌面默认的 transition: opacity 2s ease */
-                transition: opacity 3s ease 9s;
+                /* 覆盖桌面默认的 transition: opacity 2s ease。
+                   nav 第四行 4.1s 起 4.5s 渐显,在 8.6s 完全清晰;
+                   footer 在 7s 后开始淡入,3s 完成,跟 nav 收尾自然衔接。 */
+                transition: opacity 3s ease 7s;
             }
             .footer-links a {
                 /* 纵排后字号略大一点(因为不会再被挤),保持优雅 */
@@ -19360,12 +19363,12 @@
                 if (navAwakened) return; navAwakened = true; if (autoNavTimeout) clearTimeout(autoNavTimeout);
                 nav.classList.add('ready'); navItems.forEach(item => item.classList.add('awakened'));
                 setTimeout(() => quote.classList.add('awakened'), 8000);
-                // 手机端 nav 用 mask 从右往左渐显,动画在 12.6s 后完全结束。
+                // 手机端 nav 用 mask 从右往左渐显,第四行在 4.1+4.5 = 8.6s 完成。
                 // 之后清除 mask,杜绝任何边缘渲染问题或 hover 时 mask 被重新触发。
                 if (window.innerWidth < 768) {
                     setTimeout(() => {
                         navItems.forEach(item => item.classList.add('mask-cleared'));
-                    }, 13000);
+                    }, 9500);
                 }
             }
             
