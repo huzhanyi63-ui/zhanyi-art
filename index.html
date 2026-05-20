@@ -714,26 +714,20 @@
         @media (max-width: 768px) {
             /* 手机端复活右下艺术组 ——
                -----------------------------------------------------------------
-               桌面端 .l2-right-art 占右侧 56% 宽 × 100% 高,作为陪伴的人物群像
-               固定在视口右侧。手机端把它缩成右下小区域,贴视口底贴右,
-               大约 60% 视口宽 × 38% 视口高。
+               桌面端 .l2-right-art 占右侧 56% 宽 × 100% 高,作为陪伴的人物群像。
+               手机端把它缩成右下小区域,作为第一屏的视觉收尾。
 
-               用 position: fixed 而不是 absolute,有两个原因:
-                 1) 父级 #level-two 是可滚动容器(overflow-y: auto),用 absolute
-                    会让艺术组贴在内容流的底部 —— 这不是用户初始看到的右下,
-                    而是文章最末尾的位置。
-                 2) 跟桌面端"陪伴用户阅读"的语义一致:小人和头像应当一直浮在
-                    视口右下,跟随滚动。
-
-               子元素(ra-fig f1~f8 + ra-profile)百分比定位会按新容器尺寸自动
-               重新计算,视觉上等于把桌面端的右侧人物群像等比例缩成右下小场景。
-               pointer-events:none 保证不会挡到文章可滚区域。 */
+               position: absolute + top 用 calc(100vh - 高度) 让它贴在
+               #level-two 内容流的第一屏底部右侧。#level-two 是 overflow-y:auto
+               的滚动容器,absolute 子元素是相对整个滚动内容定位的,所以这里的
+               "100vh" 等于第一屏的可视高度 —— 用户下滑后艺术组会跟着内容
+               一起滚出视野,不会粘在视口右下干扰阅读。 */
             .l2-right-art {
                 display: block;
-                position: fixed;
-                top: auto;
+                position: absolute;
+                top: calc(100vh - 38vh);   /* 贴第一屏底部 */
                 right: 0;
-                bottom: 0;
+                bottom: auto;
                 left: auto;
                 width: 60vw;
                 height: 38vh;
@@ -1518,6 +1512,10 @@
             .nav-item { margin-bottom: 28px; }
             .nav-item:hover { transform: none; }
             .brand-identity { font-size: 48px; letter-spacing: 0.20em; }
+            .whisper-quote {
+                /* 手机端隐藏竖排引言 —— 跟左下三行链接位置撞了,新版直接藏掉 */
+                display: none !important;
+            }
             .whisper-quote { max-width: 78%; font-size: 12px; letter-spacing: 0.18em; }
             .footer-links { gap: 18px; }
             .footer-links a { font-size: 9px; letter-spacing: 0.3em; }
@@ -16434,11 +16432,12 @@
                 quote.style.bottom = Math.round(h * 0.06) + 'px';
                 quote.style.left = Math.round(w * 0.045) + 'px';
 
-                // —— Footer 链接:桌面右下;手机改三行纵排,沉到屏幕左下角 ——
+                // —— Footer 链接:桌面右下;手机改三行纵排,挪到树枝之间的空白处 ——
                 if (isMobile) {
-                    // 三行纵排,占用高度更大,贴近底部排
+                    // 之前贴在 h*0.06(屏幕最底),会跟竖排引言冲突且太靠下;
+                    // 现在上移到 h*0.28,正好坐落在旋转后底图"树枝之间"的留白处。
                     footerLinks.style.left = Math.round(w * 0.06) + 'px';
-                    footerLinks.style.bottom = Math.round(h * 0.06) + 'px';
+                    footerLinks.style.bottom = Math.round(h * 0.28) + 'px';
                     footerLinks.style.right = '';   // CSS 里有 right:auto !important
                 } else {
                     footerLinks.style.bottom = Math.round(h * 0.08) + 'px';
@@ -19324,6 +19323,40 @@
                     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); switchTrack(it.dataset.track); }
                 });
             });
+
+            // ── 手机端横滑切换专辑 ─────────────────────────────────────────
+            // 桌面端无效(window.innerWidth >= 768 时直接 return)。
+            // 在 #level-aud 上监听 touch:左滑→下一首,右滑→上一首。
+            // 阈值:水平位移 ≥ 60px 且至少是垂直位移的 1.5 倍 —— 防止跟"上下
+            // 滚动正文"误判。播放中也允许切换(切换会自动停掉当前曲目)。
+            (function setupAudSwipe() {
+                const audEl = document.getElementById('level-aud');
+                if (!audEl) return;
+                const order = ['withering', 'nocturne', 'shiver', 'rainy'];
+                let sx = 0, sy = 0, swiping = false;
+                audEl.addEventListener('touchstart', (e) => {
+                    if (window.innerWidth >= 768) return;
+                    if (e.touches.length !== 1) return;
+                    sx = e.touches[0].clientX;
+                    sy = e.touches[0].clientY;
+                    swiping = true;
+                }, { passive: true });
+                audEl.addEventListener('touchend', (e) => {
+                    if (!swiping) return;
+                    swiping = false;
+                    const t = e.changedTouches[0];
+                    const dx = t.clientX - sx;
+                    const dy = t.clientY - sy;
+                    if (Math.abs(dx) < 60) return;
+                    if (Math.abs(dx) < Math.abs(dy) * 1.5) return;
+                    const idx = order.indexOf(currentTrack);
+                    if (idx < 0) return;
+                    const next = dx < 0
+                        ? order[Math.min(order.length - 1, idx + 1)]    // 左滑 → 下一首
+                        : order[Math.max(0, idx - 1)];                  // 右滑 → 上一首
+                    if (next && next !== currentTrack) switchTrack(next);
+                }, { passive: true });
+            })();
 
             // ── return to home from audio level ──────────────────────────
             window.resetToHomeFromAud = function() {
