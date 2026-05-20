@@ -1703,13 +1703,6 @@
                 text-align: right;
                 font-size: 20px !important;     /* 从 26px 降到 20px,不挡背景 */
                 letter-spacing: 0.16em;
-                /* 加强光晕:右上区域底图人物离文字很近,需要更强的"纸质底"
-                   把字浮在图像之上,不被线条干扰阅读 */
-                text-shadow:
-                    0 0 22px var(--bg-color),
-                    0 0 14px var(--bg-color),
-                    0 0 7px var(--bg-color),
-                    0 0 3px var(--bg-color);
             }
             .bm-rule {
                 /* 下划线本来是 margin-left: 4% 起手左对齐 —— 改成靠右 */
@@ -1737,7 +1730,7 @@
             .nav-item:nth-child(1) { margin-right: 0; }
             .nav-item:nth-child(2) { margin-right: 24px; }
             .nav-item:nth-child(3) { margin-right: 48px; }
-            .nav-item:nth-child(4) { margin-right: 14px; }
+            .nav-item:nth-child(4) { margin-right: 0; }   /* Catching frequencies / Audio:贴最右 */
             .nav-en, .nav-sub {
                 /* nav-en 和 nav-sub 是 .nav-item 的 column 子元素,
                    align-self: flex-end 保证它们在垂直 flex 容器里靠右贴齐 */
@@ -1745,26 +1738,9 @@
                 text-align: right;
             }
             /* 手机端单独把 nav 字号压小一档(JS 算出来的 22*scale / 11*scale
-               在手机宽 ~390px 时 scale≈0.7,得 ~15/~8;再压一些,留给图像呼吸)。
-               同时加强 text-shadow:文字落在树枝/人物附近,需要更强的米白色
-               光晕把字浮在图像之上,不被线条干扰。 */
-            .nav-en {
-                font-size: 14px !important;
-                letter-spacing: 0.08em;
-                text-shadow:
-                    0 0 22px var(--bg-color),
-                    0 0 14px var(--bg-color),
-                    0 0 7px var(--bg-color),
-                    0 0 3px var(--bg-color);
-            }
-            .nav-sub {
-                font-size: 8px !important;
-                letter-spacing: 0.32em;
-                text-shadow:
-                    0 0 18px var(--bg-color),
-                    0 0 10px var(--bg-color),
-                    0 0 5px var(--bg-color);
-            }
+               在手机宽 ~390px 时 scale≈0.7,得 ~15/~8;再压一些,留给图像呼吸) */
+            .nav-en { font-size: 14px !important; letter-spacing: 0.08em; }
+            .nav-sub { font-size: 8px !important; letter-spacing: 0.32em; }
             .nav-item { margin-bottom: 20px; }
 
             /* —— Footer 链接组:从右下挪到左下偏上,改三行纵排 ——
@@ -1786,40 +1762,6 @@
                 font-size: 10px;
                 letter-spacing: 0.32em;
             }
-
-            /* ========================================================================
-               手机端右上柔光层 —— 让文字所在区域的底图"虚化"
-               -----------------------------------------------------------------------
-               文字组在屏幕右上,旋转后底图的人物身体/手臂正好叠在那里,文字被
-               线条挤压。给 body 加一个 fixed 定位的 ::after 伪元素:从右上角向
-               左下扩散的径向米白渐变,让那块图像被"纸张"柔化,文字浮在纸上。
-               用 fixed 而不是 absolute 是为了直接对齐视口右上角,不受任何容器
-               嵌套影响。z-index 介于 bg-image (z:0) 和 ui-layer (默认 z:auto,
-               但布局上在前面所以会盖在它上面) 之间 —— 这里设 z:1 即可。 */
-            body::after {
-                content: '';
-                position: fixed;
-                top: 0;
-                right: 0;
-                width: 75%;
-                height: 55%;
-                background: radial-gradient(
-                    ellipse at top right,
-                    var(--bg-color) 0%,
-                    rgba(244, 243, 239, 0.92) 22%,
-                    rgba(244, 243, 239, 0.65) 45%,
-                    rgba(244, 243, 239, 0.25) 70%,
-                    rgba(244, 243, 239, 0) 92%
-                );
-                pointer-events: none;
-                z-index: 1;
-                opacity: 0;
-                transition: opacity 3s ease 0.6s;
-            }
-            body.awakened-soul::after { opacity: 1; }
-
-            /* 删除之前 #scene-container::after 的尝试(改用 body::after 后更稳) */
-            #scene-container::after { display: none; }
         }
         @media (max-width: 1024px) {
             .l2-manifesto { grid-template-columns: 1fr; min-height: auto; padding-top: 0; }
@@ -16465,12 +16407,12 @@
                 if (brandMobile) {
                     if (isMobile) {
                         // 顺时针旋转 90° 后的新构图:树枝在左上、头身在右下。
-                        // brand 贴右上,文字本身已经 CSS 设了 text-align: right,
-                        // 这里只写 right + top,把 left 留空(CSS 里 !important 覆盖)。
-                        // right 从 0.06 改到 0.045,文字更靠右边一点,远离左下方人物
+                        // brand 贴右上,文字本身已经 CSS 设了 text-align: right。
+                        // right 用 0.025(再次贴近右边缘),让文字距右边缘更近,
+                        // 远离图像中心的人物/手臂线条。
                         brandMobile.style.top = Math.round(h * 0.06) + 'px';
-                        brandMobile.style.right = Math.round(w * 0.045) + 'px';
-                        brandMobile.style.left = '';   // 让 CSS 的 left:auto !important 生效
+                        brandMobile.style.right = Math.round(w * 0.025) + 'px';
+                        brandMobile.style.left = '';
                     } else {
                         brandMobile.style.top = Math.round(h * 0.08) + 'px';
                         brandMobile.style.left = Math.round(w * 0.05) + 'px';
@@ -16481,8 +16423,8 @@
                 // —— 主导航:桌面贴左上(brand 下方);手机贴屏幕右上(brand 下方) ——
                 if (isMobile) {
                     nav.style.top = Math.round(h * 0.15) + 'px';
-                    nav.style.right = Math.round(w * 0.045) + 'px';   // 跟 brand 对齐,更靠右
-                    nav.style.left = '';   // CSS 里没设 !important,这里清空就够了
+                    nav.style.right = Math.round(w * 0.025) + 'px';   // 跟 brand 对齐
+                    nav.style.left = '';
                 } else {
                     nav.style.top = Math.round(h * 0.17) + 'px';
                     nav.style.left = Math.round(w * 0.05) + 'px';
@@ -16499,10 +16441,9 @@
                 // —— Footer 链接:桌面右下;手机改三行纵排,挪到树枝之间的空白处 ——
                 if (isMobile) {
                     // 之前贴在 h*0.06(屏幕最底),会跟竖排引言冲突且太靠下;
-                    // 上移到树枝之间留白处,实测 0.28 偏高,降到 0.20 刚好落在
-                    // 树根延伸出来的"圈出来那块空白"。
+                    // 上移到树枝之间留白处:0.23(比之前 0.20 再上一丢丢)。
                     footerLinks.style.left = Math.round(w * 0.06) + 'px';
-                    footerLinks.style.bottom = Math.round(h * 0.20) + 'px';
+                    footerLinks.style.bottom = Math.round(h * 0.23) + 'px';
                     footerLinks.style.right = '';   // CSS 里有 right:auto !important
                 } else {
                     footerLinks.style.bottom = Math.round(h * 0.08) + 'px';
