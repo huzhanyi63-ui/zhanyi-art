@@ -19470,17 +19470,17 @@
                     if (crossed) return;
                     crossed = true;
 
-                    // Disperse letters to the bottom-right corner, with jitter + spin.
-                    // 手机端单独调成"种子缓缓飘落":距离更近、错峰更大、旋转适度。
-                    // 桌面端逻辑完全不变。
+                    // Disperse letters with jitter + spin.
+                    // 桌面端:往右上角飘散(原始设计:outY 取负值 = 向屏幕上方)。
+                    // 手机端:种子般缓缓往右下飘落(距离更近、错峰更大、旋转更柔)。
                     const isMobile = window.innerWidth < 768;
                     letters.forEach((l, i) => {
                         const outX = isMobile
                             ? 80 + Math.random() * 120           // 手机:右移 80-200px
-                            : 700 + Math.random() * 400;         // 桌面:原值 700-1100
+                            : 700 + Math.random() * 400;         // 桌面:原值 700-1100,往右
                         const outY = isMobile
-                            ? 280 + Math.random() * 180          // 手机:下落 280-460px(够看见整个过程)
-                            : 500 + Math.random() * 300;         // 桌面:原值 500-800
+                            ? 280 + Math.random() * 180          // 手机:向下 280-460px(往右下)
+                            : -500 - Math.random() * 300;        // 桌面:原值 -500~-800,往上(右上)
                         const outR = isMobile
                             ? (Math.random() - 0.3) * 540        // 手机:中等旋转(1.5 圈以内)
                             : (Math.random() - 0.3) * 320;       // 桌面:原值 320
