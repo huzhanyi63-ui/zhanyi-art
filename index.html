@@ -1791,30 +1791,35 @@
                手机端右上柔光层 —— 让文字所在区域的底图"虚化"
                -----------------------------------------------------------------------
                文字组在屏幕右上,旋转后底图的人物身体/手臂正好叠在那里,文字被
-               线条挤压。给 #scene-container 加一个伪元素 overlay:从右上角向
+               线条挤压。给 body 加一个 fixed 定位的 ::after 伪元素:从右上角向
                左下扩散的径向米白渐变,让那块图像被"纸张"柔化,文字浮在纸上。
-               这个 overlay 在 #bg-image 之上、ui-layer 之下(z-index: 1)。 */
-            #scene-container::after {
+               用 fixed 而不是 absolute 是为了直接对齐视口右上角,不受任何容器
+               嵌套影响。z-index 介于 bg-image (z:0) 和 ui-layer (默认 z:auto,
+               但布局上在前面所以会盖在它上面) 之间 —— 这里设 z:1 即可。 */
+            body::after {
                 content: '';
-                position: absolute;
+                position: fixed;
                 top: 0;
                 right: 0;
-                width: 65%;
-                height: 60%;
+                width: 75%;
+                height: 55%;
                 background: radial-gradient(
                     ellipse at top right,
                     var(--bg-color) 0%,
-                    rgba(244, 243, 239, 0.85) 25%,
-                    rgba(244, 243, 239, 0.5) 50%,
-                    rgba(244, 243, 239, 0) 80%
+                    rgba(244, 243, 239, 0.92) 22%,
+                    rgba(244, 243, 239, 0.65) 45%,
+                    rgba(244, 243, 239, 0.25) 70%,
+                    rgba(244, 243, 239, 0) 92%
                 );
                 pointer-events: none;
                 z-index: 1;
                 opacity: 0;
-                /* 跟随 awakened-soul 状态淡入,跟底图生长同步 */
                 transition: opacity 3s ease 0.6s;
             }
-            body.awakened-soul #scene-container::after { opacity: 1; }
+            body.awakened-soul::after { opacity: 1; }
+
+            /* 删除之前 #scene-container::after 的尝试(改用 body::after 后更稳) */
+            #scene-container::after { display: none; }
         }
         @media (max-width: 1024px) {
             .l2-manifesto { grid-template-columns: 1fr; min-height: auto; padding-top: 0; }
