@@ -1845,22 +1845,23 @@
         }
 
         /* ========================================================================
-           手机端右上角红色小人飘浮组 —— 已停用
-           新版手机端把整张底图顺时针旋转 90°,原图里那群小人本就在屏幕右上区域
-           自然出现,不再需要这套额外飘浮图层。强制 display:none 以免重叠。
+           手机端右上角红色小人飘浮组 —— 现在挪到左上区域
+           整张底图顺时针旋转 90° 后,左上方是树枝末梢延伸的区域,留白较多。
+           小人重新沿着这片树枝散布,自然填充。
            ======================================================================== */
-        #mobile-figs { display: none !important; }
+        #mobile-figs { display: none; }
 
         @media (max-width: 768px) {
-            /* 旋转 90° 的新构图里这组飘浮小人会跟头像区域打架,整体停用。
-               下方的 .mf* 定位/动画规则保留只是为了不破坏现有结构,实际不会渲染。 */
+            /* 容器:从原本的右上区域(right:0)挪到左上区域(left:0),
+               同时把宽度收窄一点,因为左上的可用留白比右上更窄(右上是清晰
+               白底,左上有树枝穿过)。 */
             #mobile-figs {
-                display: none !important;
+                display: block;
                 position: absolute;
                 top: 0;
-                right: 0;
-                width: 55%;
-                height: 70%;
+                left: 0;
+                width: 60%;          /* 占视口左侧 60% 宽 */
+                height: 55%;         /* 占视口上方 55% 高 */
                 pointer-events: none;
                 z-index: 2;
                 opacity: 0;
@@ -1874,39 +1875,43 @@
                 will-change: transform, opacity;
                 filter: drop-shadow(0 2px 6px rgba(160, 101, 74, 0.15));
             }
+            /* 重新定位:之前用 right 定位贴右侧,现在改用 left 贴左侧;
+               同时整体缩小一档(原 6~14% width → 5~11%),因为左上区域被
+               树枝占了一半,可用宽度更紧。
+               每个小人尽量散布在树枝之间的小缝隙里,不堆在一起。 */
             #mobile-figs .mf1 {
-                top: 38%; right: 8%; width: 14%;
-                --o: 0.72; --r: -4deg;
+                top: 32%; left: 42%; width: 11%;
+                --o: 0.62; --r: -4deg;
                 animation: mf-in-a 5s ease-out 1.8s forwards,
                            mf-drift-a 14s ease-in-out 7s infinite;
             }
             #mobile-figs .mf2 {
-                top: 28%; right: 26%; width: 11%;
-                --o: 0.58; --r: 8deg;
+                top: 22%; left: 28%; width: 9%;
+                --o: 0.5; --r: 8deg;
                 animation: mf-in-b 5.4s ease-out 2.2s forwards,
                            mf-drift-b 16s ease-in-out 7.5s infinite;
             }
             #mobile-figs .mf3 {
-                top: 18%; right: 14%; width: 9%;
-                --o: 0.48; --r: -10deg;
+                top: 14%; left: 48%; width: 8%;
+                --o: 0.42; --r: -10deg;
                 animation: mf-in-a 5.6s ease-out 2.6s forwards,
                            mf-drift-a 15s ease-in-out 8s infinite;
             }
             #mobile-figs .mf4 {
-                top: 12%; right: 34%; width: 7.5%;
-                --o: 0.38; --r: 6deg;
+                top: 9%; left: 16%; width: 6.5%;
+                --o: 0.34; --r: 6deg;
                 animation: mf-in-b 5.8s ease-out 3s forwards,
                            mf-drift-b 18s ease-in-out 8.5s infinite;
             }
             #mobile-figs .mf5 {
-                top: 5%; right: 22%; width: 6%;
-                --o: 0.28; --r: -3deg;
+                top: 4%; left: 36%; width: 5.5%;
+                --o: 0.26; --r: -3deg;
                 animation: mf-in-a 6s ease-out 3.4s forwards,
                            mf-drift-a 17s ease-in-out 9s infinite;
             }
             #mobile-figs .mf6 {
-                top: 48%; right: 38%; width: 8%;
-                --o: 0.42; --r: 12deg;
+                top: 42%; left: 22%; width: 7.5%;
+                --o: 0.38; --r: 12deg;
                 animation: mf-in-b 5.6s ease-out 2.8s forwards,
                            mf-drift-b 16s ease-in-out 7.8s infinite;
             }
