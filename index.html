@@ -570,16 +570,17 @@
         #awaken-text .letter {
             text-shadow: 0 0 18px var(--bg-color), 0 0 9px var(--bg-color), 0 0 4px var(--bg-color);
         }
-        /* —— 手机端 Awaken 字母飘散:像种子下沉的感觉(仅 ≤768px) ——
+        /* —— 手机端 Awaken 字母飘散:像种子缓缓飘落的感觉(仅 ≤768px) ——
            桌面端完全不受影响,沿用通用 .letter.scatter-out 的 4s/3s 默认节奏。
-           手机端覆盖为更柔更慢:transform 7.5s 缓出,opacity 6s 起步延 0.6s 再淡。
-           缓动曲线 cubic-bezier(0.16, 1, 0.3, 1) ≈ easeOutExpo,前段走完大半路程,
-           后段缓慢落定 —— 贴合"种子离手 → 缓慢沉降"的物理直觉。 */
+           手机端把整个过程拉长:transform 8s + opacity 7s, 用 ease-in-out
+           做"前慢中匀后慢"的匀速感(不是 easeOutExpo 那种前猛后缓)。
+           !important 是因为通用 .letter.scatter-out 已经在 inline-style 之外
+           带了 !important 的 transition,这里要覆盖必须也带 !important。 */
         @media (max-width: 768px) {
             #awaken-text .letter.scatter-out {
                 transition:
-                    transform 7.5s cubic-bezier(0.16, 1, 0.3, 1),
-                    opacity 6s cubic-bezier(0.4, 0, 0.6, 1) 0.6s !important;
+                    transform 8s ease-in-out,
+                    opacity 7s ease-in-out !important;
             }
         }
         @media (max-width: 768px) { #awaken-text { font-size: 28px; } }
@@ -11741,315 +11742,50 @@
         }
         #level-aud.playing-mode .aud-poem .poem-foot { opacity: 1; }
 
-        /* Album label and scroll hint — mobile-only elements.
-           Hidden by default; shown via @media (max-width: 768px) rules. */
-        .aud-album-label { display: none; }
-        .aud-scroll-hint { display: none; }
-
-        /* ── MOBILE ─────────────────────────────────────────────────────────
-           完全重新设计的沉浸式聆听版。设计要点:
-           1) 进入即纯视觉:封面居中,无 grid 分栏,无长文本占用第一屏
-           2) 四张专辑横滑切换:整页背景颜色跟随专辑氛围(withering 暗绿、
-              nocturne 深蓝、shiver 暖绿、rainy 雨灰)同步染色
-           3) 点击封面 → 黑胶从封面后侧滑出旋转,诗歌从下方淡入,继续保持
-              第一屏即沉浸
-           4) 长文本不再 default 显示,在屏幕底部一个小 ↓ 提示符,下滑滚动后
-              文本浮现 —— 沉浸优先,阅读次之
-           5) 切换指示器:四个小 dot + 罗马数字,在封面正上方
-           ─────────────────────────────────────────────────────────────────── */
-        @media (max-width: 768px) {
-
-            /* ===== 全页面背景:跟随专辑氛围色染色 =====
-               每张专辑一个色卡,切换 .show-* class 时整页 800ms 渐变。
-               未播放时较浅,playing-mode 时压暗加深。
-               Withering 默认态 = 无 .show-* class,使用 #level-aud 自身的背景。 */
-            #level-aud {
-                /* 默认 = withering 氛围:雨夜湿润的暗灰底 */
-                background:
-                    radial-gradient(ellipse at 50% 30%, rgba(40,48,42,0.06) 0%, transparent 60%),
-                    var(--bg-color);
-                transition: background 1s ease;
-            }
-            #level-aud.show-nocturne {
-                background:
-                    radial-gradient(ellipse at 50% 30%, rgba(24,45,84,0.08) 0%, transparent 60%),
-                    var(--bg-color);
-            }
-            #level-aud.show-shiver {
-                background:
-                    radial-gradient(ellipse at 50% 30%, rgba(80,110,60,0.07) 0%, transparent 60%),
-                    var(--bg-color);
-            }
-            #level-aud.show-rny {
-                background:
-                    radial-gradient(ellipse at 50% 30%, rgba(60,75,90,0.07) 0%, transparent 60%),
-                    var(--bg-color);
-            }
-            /* 播放中:整页背景压暗,把全部注意力集中到旋转的黑胶 */
-            #level-aud.playing-mode {
-                background: #0d0e0f;
-                transition: background 1.4s ease;
-            }
-            #level-aud.playing-mode.show-nocturne { background: #06101f; }
-            #level-aud.playing-mode.show-shiver   { background: #0c1810; }
-            #level-aud.playing-mode.show-rny      { background: #0e1417; }
-
-            /* ===== 网格改成单列上下:封面在上,文字在下(下滑才看见) ===== */
+        /* ── MOBILE ─────────────────────────────────────────────────── */
+        @media (max-width: 900px) {
             .aud-grid {
-                display: block;
-                grid-template-columns: none;
-                grid-template-rows: none;
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+                height: auto; min-height: 100vh;
+            }
+            .aud-text {
                 height: auto;
-                min-height: 100vh;
-                position: relative;
+                padding: 11vh 7vw 4vh;
+                background: var(--bg-color);
+                justify-content: flex-start;
             }
-
-            /* ===== 舞台:占第一屏全屏 =====
-               封面居中,所有特效层(雨、雾、光晕)在 stage 内. */
+            .aud-text .lede { font-size: 24px; margin-bottom: 22px; }
+            .aud-text .body p { font-size: 14.5px; }
+            .aud-text .marker-bottom { display: none; }
             .aud-stage {
-                position: relative;
-                width: 100%;
-                height: 100vh;
-                min-height: 100vh;
-                padding: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                overflow: hidden;
+                padding: 6vh 6vw 8vh;
+                min-height: 110vh;
+                align-items: flex-start;
+                padding-top: 8vh;
             }
-
-            /* ===== 切换指示器:四个罗马数字 + dot,贴顶部居中 =====
-               .aud-tracks 原本桌面端是左下竖排,手机端改成顶部横排. */
-            .aud-tracks {
-                position: fixed;
-                left: 50%;
-                top: 64px;
-                bottom: auto;
-                transform: translateX(-50%);
-                flex-direction: row;
-                gap: 22px;
-                opacity: 0;
-                transition: opacity 1.4s ease 1s;
-                z-index: 95;
-            }
-            #level-aud.active .aud-tracks { opacity: 1; }
-            /* 播放中淡化(不要碍眼) */
-            #level-aud.playing-mode .aud-tracks { opacity: 0.4; }
-
-            .aud-tracks .track-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 4px;
-                padding: 4px 2px;
-                font-size: 0;            /* 隐藏 track-name(横排没空间) */
-            }
-            .aud-tracks .track-item .track-name { display: none; }
-            .aud-tracks .track-item .track-rule {
-                width: 18px;
-                height: 1px;
-                opacity: 0.35;
-                transition: opacity 0.6s ease, width 0.6s ease;
-            }
-            .aud-tracks .track-item.active .track-rule {
-                width: 28px;
-                opacity: 0.95;
-            }
-            .aud-tracks .track-item .track-num {
-                font-size: 9px;
-                letter-spacing: 0.32em;
-                opacity: 0.55;
-                transition: opacity 0.6s ease;
-            }
-            .aud-tracks .track-item.active .track-num { opacity: 1; }
-
-            /* ===== 封面:居中,加大,带过渡 =====
-               左右滑动时整组封面要跟着挪 —— JS 给 .aud-stage 加 dragging
-               class 时,封面会跟手指移动(transform: translateX)。
-               松手后判断方向 → 调用 switchTrack。 */
-            .aud-album {
-                position: relative;
-                width: min(72vw, 56vh);
-                aspect-ratio: 1 / 1;
-                opacity: 0;
-                transform: translateY(20px) scale(0.96);
-                transition: opacity 1.4s ease 0.4s,
-                            transform 1.4s cubic-bezier(0.22,1,0.36,1) 0.4s;
-            }
-            #level-aud.active .aud-album {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            /* 播放中:封面略微上抬,给诗歌让位置 */
+            .aud-album { width: min(48vw, 38vh); }
             #level-aud.active.playing-mode .aud-album {
-                transform: translateY(-7vh) scale(0.88);
-                transition: transform 1.4s cubic-bezier(0.22,1,0.36,1);
+                transform: translateY(-2vh) scale(0.94);
             }
-
-            /* 黑胶在播放时滑出 —— 手机端往右侧滑出更少(屏幕窄,滑太多看不到) */
-            #level-aud.playing-mode .aud-vinyl { transform: translateX(48%); }
-
-            /* ===== 专辑名/副标题:在封面下方淡入 =====
-               未播放时显示 "Withering · 萎败" 这种小字双语,播放后隐藏让诗歌主导 */
-            .aud-album-label {
-                display: block;       /* 桌面端默认 none,这里在手机端显示 */
-                position: absolute;
-                left: 50%;
-                top: calc(50% + min(36vw, 28vh) + 28px);
-                transform: translateX(-50%);
-                text-align: center;
-                white-space: nowrap;
-                opacity: 0;
-                transition: opacity 1.2s ease 1.4s;
-                pointer-events: none;
-                z-index: 6;
-            }
-            #level-aud.active .aud-album-label { opacity: 1; }
-            #level-aud.playing-mode .aud-album-label { opacity: 0; transition: opacity 0.6s ease; }
-            .aud-album-label .lbl-name {
-                display: block;
-                font-family: 'Cormorant Garamond', serif;
-                font-style: italic;
-                font-size: 18px;
-                color: rgba(10,10,10,0.78);
-                letter-spacing: 0.02em;
-                margin-bottom: 4px;
-            }
-            .aud-album-label .lbl-sub {
-                display: block;
-                font-family: 'Montserrat', sans-serif;
-                font-weight: 300;
-                font-size: 9px;
-                letter-spacing: 0.45em;
-                text-transform: uppercase;
-                color: rgba(10,10,10,0.42);
-            }
-            /* 暗色舞台时(任一非 withering 默认),label 改成浅色 */
-            #level-aud.show-nocturne .aud-album-label .lbl-name,
-            #level-aud.show-shiver   .aud-album-label .lbl-name,
-            #level-aud.show-rny      .aud-album-label .lbl-name {
-                color: rgba(232,238,250,0.88);
-            }
-            #level-aud.show-nocturne .aud-album-label .lbl-sub,
-            #level-aud.show-shiver   .aud-album-label .lbl-sub,
-            #level-aud.show-rny      .aud-album-label .lbl-sub {
-                color: rgba(232,238,250,0.55);
-            }
-
-            /* ===== 诗歌:从下方滑入(playing-mode 时) ===== */
+            #level-aud.playing-mode .aud-vinyl { transform: translateX(58%); }
             .aud-poem {
-                position: absolute;
-                left: 50%;
                 top: auto;
-                bottom: 6vh;
-                transform: translateX(-50%) translateY(20px);
-                width: 84vw;
-                max-width: 480px;
-                text-align: center;
-                z-index: 4;
+                bottom: 4vh;
+                width: 88%;
+                max-width: 540px;
             }
             .aud-poem .poem-grid {
                 grid-template-columns: 1fr;
-                gap: 12px;
+                gap: 14px;
                 text-align: center;
             }
-            .aud-poem .poem-stanza { font-size: 13px; line-height: 1.7; }
-            .aud-poem .poem-name { font-size: 20px; }
-
-            /* ===== 长文章节(aud-text):默认隐藏在第一屏下方 =====
-               下滑滚动到第二屏才出现,标题 + 段落紧凑排版. */
-            .aud-text {
-                position: relative;
-                width: 100%;
-                min-height: 100vh;
-                padding: 12vh 8vw 14vh;
-                background: var(--bg-color);
-                background: linear-gradient(to bottom,
-                    rgba(244,243,239,0) 0%,
-                    var(--bg-color) 12%,
-                    var(--bg-color) 100%);
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-                z-index: 2;
-            }
-            .aud-text .eyebrow {
-                font-size: 9px;
-                letter-spacing: 0.4em;
-                margin-bottom: 28px;
-            }
-            .aud-text .lede {
-                font-size: 23px;
-                line-height: 1.32;
-                margin-bottom: 24px;
-            }
-            .aud-text .body { gap: 14px; }
-            .aud-text .body p { font-size: 14.5px; line-height: 1.72; }
-            .aud-text .marker-bottom { display: none; }
-
-            /* ===== 滚动提示符:在第一屏底部,微小箭头 + scroll 字样 =====
-               文字会在第一屏停留时呼吸,告诉用户"下面还有内容" */
-            .aud-scroll-hint {
-                display: block;       /* 桌面端默认 none,这里在手机端显示 */
-                position: fixed;
-                left: 50%;
-                bottom: 18px;
-                transform: translateX(-50%);
-                font-family: 'Montserrat', sans-serif;
-                font-weight: 300;
-                font-size: 8px;
-                letter-spacing: 0.45em;
-                text-transform: uppercase;
-                color: rgba(10,10,10,0.4);
-                opacity: 0;
-                transition: opacity 1s ease 2.5s, color 0.8s ease;
-                pointer-events: none;
-                z-index: 90;
-                white-space: nowrap;
-                animation: scroll-hint-breath 3.5s ease-in-out infinite 4s;
-            }
-            #level-aud.active .aud-scroll-hint { opacity: 0.65; }
-            /* 播放中和暗色背景下,提示符要改成浅色 */
-            #level-aud.playing-mode .aud-scroll-hint,
-            #level-aud.show-nocturne .aud-scroll-hint,
-            #level-aud.show-shiver   .aud-scroll-hint,
-            #level-aud.show-rny      .aud-scroll-hint {
-                color: rgba(232,238,250,0.5);
-            }
-            @keyframes scroll-hint-breath {
-                0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.5; }
-                50%      { transform: translateX(-50%) translateY(4px); opacity: 0.85; }
-            }
-
-            /* ===== 返回按钮和章节标识:贴在屏幕角落,半透明 ===== */
-            .aud-back {
-                top: 20px;
-                left: 20px;
-                font-size: 13px;
-                opacity: 0.55;
-            }
-            .aud-chap {
-                top: 24px;
-                right: 20px;
-                font-size: 8.5px;
-                letter-spacing: 0.32em;
-            }
-
-            /* ===== 暗化部分桌面端的舞台 ::before / ::after overlay(雨夜雾感) ===== */
-            /* 这些 overlay 桌面端是在 .aud-stage 上的,手机端继承,
-               但我们整页背景已经在用 #level-aud 染色,叠加效果会过重,
-               所以播放中适度降低这两层 overlay 的不透明度. */
-            #level-aud.playing-mode .aud-stage::before {
-                opacity: 0.6;   /* 桌面端是 1 */
-            }
+            .aud-poem .poem-stanza { font-size: 13px; line-height: 1.65; }
+            .aud-poem .poem-name { font-size: 19px; }
         }
-
-        /* 更窄屏(< 380px,极小手机)再微调 */
-        @media (max-width: 380px) {
-            .aud-album { width: min(78vw, 50vh); }
-            .aud-album-label .lbl-name { font-size: 16px; }
-            .aud-poem { width: 88vw; bottom: 4vh; }
-            .aud-poem .poem-stanza { font-size: 12.5px; }
+        @media (max-width: 540px) {
+            .aud-album { width: 56vw; }
+            #level-aud.playing-mode .aud-vinyl { transform: translateX(52%); }
         }
 
         /* ================================================================ */
@@ -13955,13 +13691,6 @@
                             <audio id="aud-rainy" src="audio/Rainy_Day.mp3" loop preload="auto" playsinline></audio>
                         </div><!-- /.aud-stage-rainy -->
 
-                        <!-- Album name label — mobile only. JS keeps text in sync with currentTrack.
-                             Hidden on desktop via CSS @media. -->
-                        <div class="aud-album-label" id="aud-album-label" aria-hidden="true">
-                            <span class="lbl-name" id="lbl-name">Withering</span>
-                            <span class="lbl-sub" id="lbl-sub">I · 萎败</span>
-                        </div>
-
                     </main>
 
                     <!-- Book-index track switcher — sits in the corner of the stage area -->
@@ -13987,12 +13716,6 @@
                             <span class="track-name">Rainy Day</span>
                         </div>
                     </nav>
-
-                    <!-- Scroll hint — mobile only. Tells the user the chapter text is below the
-                         immersive first screen. Hidden on desktop via CSS @media. -->
-                    <div class="aud-scroll-hint" id="aud-scroll-hint" aria-hidden="true">
-                        ↓ &nbsp; scroll &nbsp; for &nbsp; text
-                    </div>
                 </div>
             </div>
         </div>
@@ -19578,30 +19301,6 @@
             });
 
             // ── Track switcher ──────────────────────────────────────────
-            // 四张专辑的双语标签数据(手机端用)
-            const trackLabels = {
-                withering: { name: 'Withering',                  sub: 'I · 萎败' },
-                nocturne:  { name: 'Nocturne in Ultramarine',    sub: 'II · 群青夜曲' },
-                shiver:    { name: 'A Shiver of Green',          sub: 'III · 绿之颤栗' },
-                rainy:     { name: 'Rainy Day',                  sub: 'IV · 雨天' }
-            };
-            function syncAlbumLabel(trackId) {
-                const lblName = document.getElementById('lbl-name');
-                const lblSub = document.getElementById('lbl-sub');
-                const data = trackLabels[trackId];
-                if (!lblName || !lblSub || !data) return;
-                // 淡出后改文字,再淡入 —— 避免闪烁
-                const wrap = document.getElementById('aud-album-label');
-                if (wrap) wrap.style.opacity = '0';
-                setTimeout(() => {
-                    lblName.textContent = data.name;
-                    lblSub.textContent = data.sub;
-                    if (wrap && audLevel.classList.contains('active') && !audLevel.classList.contains('playing-mode')) {
-                        wrap.style.opacity = '';   // 清掉,让 CSS 接管
-                    }
-                }, 400);
-            }
-
             function switchTrack(trackId) {
                 if (!tracks[trackId] || trackId === currentTrack) return;
                 if (audPlaying) {
@@ -19618,7 +19317,6 @@
                 document.querySelectorAll('#aud-tracks .track-item').forEach(it => {
                     it.classList.toggle('active', it.dataset.track === trackId);
                 });
-                syncAlbumLabel(trackId);
             }
             document.querySelectorAll('#aud-tracks .track-item').forEach(it => {
                 it.addEventListener('click', () => switchTrack(it.dataset.track));
@@ -19626,52 +19324,6 @@
                     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); switchTrack(it.dataset.track); }
                 });
             });
-
-            // ── 手机端横滑切换专辑 ────────────────────────────────────────
-            // 在 aud-stage 上监听 touch,左右滑超过阈值就切到上/下一张。
-            // 不影响垂直滚动:如果垂直位移 > 水平位移,就当作滚动放过.
-            (function setupAudSwipe() {
-                const stage = document.getElementById('aud-stage');
-                if (!stage) return;
-                const order = ['withering', 'nocturne', 'shiver', 'rainy'];
-                let sx = 0, sy = 0, swiping = false;
-                stage.addEventListener('touchstart', (e) => {
-                    if (window.innerWidth >= 768) return;        // 桌面端无效
-                    if (audLevel.classList.contains('playing-mode')) return;  // 播放中不切
-                    if (e.touches.length !== 1) return;
-                    sx = e.touches[0].clientX;
-                    sy = e.touches[0].clientY;
-                    swiping = true;
-                }, { passive: true });
-                stage.addEventListener('touchend', (e) => {
-                    if (!swiping) return;
-                    swiping = false;
-                    const t = e.changedTouches[0];
-                    const dx = t.clientX - sx;
-                    const dy = t.clientY - sy;
-                    // 水平位移 > 垂直位移 1.5 倍 且 绝对值大于 60px 才算 swipe
-                    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-                    const idx = order.indexOf(currentTrack);
-                    if (idx < 0) return;
-                    let next;
-                    if (dx < 0) next = order[Math.min(order.length - 1, idx + 1)];   // 左滑 → 下一张
-                    else        next = order[Math.max(0, idx - 1)];                   // 右滑 → 上一张
-                    if (next && next !== currentTrack) switchTrack(next);
-                }, { passive: true });
-            })();
-
-            // ── 用户滚动后,scroll-hint 自动消失 ────────────────────────
-            (function setupScrollHint() {
-                const hint = document.getElementById('aud-scroll-hint');
-                const level = document.getElementById('level-aud');
-                if (!hint || !level) return;
-                level.addEventListener('scroll', () => {
-                    if (level.scrollTop > 40) {
-                        hint.style.opacity = '0';
-                        hint.style.transition = 'opacity 0.6s ease';
-                    }
-                }, { passive: true });
-            })();
 
             // ── return to home from audio level ──────────────────────────
             window.resetToHomeFromAud = function() {
@@ -19687,15 +19339,6 @@
                 document.querySelectorAll('#aud-tracks .track-item').forEach(it => {
                     it.classList.toggle('active', it.dataset.track === 'withering');
                 });
-                // 同步手机端 album-label
-                const lblName = document.getElementById('lbl-name');
-                const lblSub  = document.getElementById('lbl-sub');
-                if (lblName && lblSub) {
-                    lblName.textContent = 'Withering';
-                    lblSub.textContent  = 'I · 萎败';
-                }
-                const hint = document.getElementById('aud-scroll-hint');
-                if (hint) { hint.style.opacity = ''; hint.style.transition = ''; }
                 restoreAmbient();
                 document.getElementById('white-overlay').style.opacity = '1';
                 document.getElementById('level-aud').classList.remove('active');
@@ -19789,19 +19432,27 @@
                     crossed = true;
 
                     // Disperse letters to the bottom-right corner, with jitter + spin.
-                    // 手机端单独把旋转幅度加大,配合 CSS 里更长的 transition,
-                    // 飘散显得更柔更有"种子翻转下落"的感觉;桌面端逻辑完全不变。
+                    // 手机端单独调成"种子缓缓飘落":距离更近、错峰更大、旋转适度。
+                    // 桌面端逻辑完全不变。
                     const isMobile = window.innerWidth < 768;
                     letters.forEach((l, i) => {
-                        const outX = 700 + Math.random() * 400;     // → right
-                        const outY = 500 + Math.random() * 300;     // → down
-                        // 旋转幅度:桌面端保留原值 320°;手机端加大到 ~720°(约两圈),
-                        // 在 7.5s 长时长里看起来像种子缓慢翻转
-                        const outR = (Math.random() - 0.3) * (isMobile ? 720 : 320);
+                        const outX = isMobile
+                            ? 80 + Math.random() * 120           // 手机:右移 80-200px
+                            : 700 + Math.random() * 400;         // 桌面:原值 700-1100
+                        const outY = isMobile
+                            ? 280 + Math.random() * 180          // 手机:下落 280-460px(够看见整个过程)
+                            : 500 + Math.random() * 300;         // 桌面:原值 500-800
+                        const outR = isMobile
+                            ? (Math.random() - 0.3) * 540        // 手机:中等旋转(1.5 圈以内)
+                            : (Math.random() - 0.3) * 320;       // 桌面:原值 320
                         l.style.setProperty('--out-x', outX + 'px');
                         l.style.setProperty('--out-y', outY + 'px');
                         l.style.setProperty('--out-r', outR + 'deg');
-                        l.style.transitionDelay = (i * 0.06 + Math.random() * 0.08) + 's';
+                        // 错峰:手机端每字母间隔 0.25s + 0.2s 随机,像一颗颗种子先后落下
+                        const stagger = isMobile
+                            ? (i * 0.25 + Math.random() * 0.2)
+                            : (i * 0.06 + Math.random() * 0.08);
+                        l.style.transitionDelay = stagger + 's';
                         requestAnimationFrame(() => l.classList.add('scatter-out'));
                     });
 
