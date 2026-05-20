@@ -16435,9 +16435,10 @@
                 // —— Footer 链接:桌面右下;手机改三行纵排,挪到树枝之间的空白处 ——
                 if (isMobile) {
                     // 之前贴在 h*0.06(屏幕最底),会跟竖排引言冲突且太靠下;
-                    // 现在上移到 h*0.28,正好坐落在旋转后底图"树枝之间"的留白处。
+                    // 上移到树枝之间留白处,实测 0.28 偏高,降到 0.20 刚好落在
+                    // 树根延伸出来的"圈出来那块空白"。
                     footerLinks.style.left = Math.round(w * 0.06) + 'px';
-                    footerLinks.style.bottom = Math.round(h * 0.28) + 'px';
+                    footerLinks.style.bottom = Math.round(h * 0.20) + 'px';
                     footerLinks.style.right = '';   // CSS 里有 right:auto !important
                 } else {
                     footerLinks.style.bottom = Math.round(h * 0.08) + 'px';
