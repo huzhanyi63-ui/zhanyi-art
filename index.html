@@ -6,7 +6,7 @@
     <title>Zhanyi Hu | Awakened Soul</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@100;200;300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Spectral:ital,wght@0,200;0,300;0,400;0,500;1,200;1,300;1,400&family=Montserrat:wght@100;200;300;400&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #0a0a0a;
@@ -45,20 +45,23 @@
             filter: contrast(1.08) grayscale(0.08) brightness(0.98);
             -webkit-mask-image: linear-gradient(215deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 60%);
             mask-image: linear-gradient(215deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 60%);
-            -webkit-mask-size: 300% 300%; mask-size: 300% 300%;
+            -webkit-mask-size: 220% 220%; mask-size: 220% 220%;
             -webkit-mask-position: 0% 100%; mask-position: 0% 100%;
-            transform: scale(1.05);
+            transform: scale(1.05) translateZ(0);
+            backface-visibility: hidden;
             will-change: mask-position, transform;
-            /* 【修复】：恢复我们打磨好的优雅、缓慢的入场动画曲线，而不是飞速闪现 */
-            animation: tree-grow 9s cubic-bezier(0.42, 0.05, 0.5, 0.95) 0.4s forwards;
+            /* 丝滑入场：更快起步、优雅收尾，不再慢悠悠 */
+            animation: tree-grow 4.2s cubic-bezier(0.22, 0.61, 0.36, 1) 0.25s forwards;
             animation-play-state: paused;   /* held until #awaken-gate is crossed */
         }
         body.awakened-soul #bg-image { animation-play-state: running; }
 
         @keyframes tree-grow {
-            0% { -webkit-mask-position: 0% 100%; mask-position: 0% 100%; transform: scale(1.05); }
-            100% { -webkit-mask-position: 100% 0%; mask-position: 100% 0%; transform: scale(1); }
+            0% { -webkit-mask-position: 0% 100%; mask-position: 0% 100%; transform: scale(1.05) translateZ(0); }
+            100% { -webkit-mask-position: 100% 0%; mask-position: 100% 0%; transform: scale(1) translateZ(0); }
         }
+        /* once grown, drop the compositor hint so it doesn't hog a layer */
+        body.awakened-soul #bg-image { animation-fill-mode: forwards; }
 
 
         /* ── Custom cursor — site-wide. The red chalk stroke replaces the system pointer.
@@ -531,6 +534,7 @@
         .nav-item:nth-child(2) { margin-left: 45px; }
         .nav-item:nth-child(3) { margin-left: 90px; }
         .nav-item:nth-child(4) { margin-left: 25px; }
+        .nav-item:nth-child(5) { margin-left: 60px; }
         .nav-item:hover { transform: translateX(8px); }
         .nav-en { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 300; color: var(--primary-color); letter-spacing: 0.1em; margin-bottom: 4px; }
         .nav-sub { font-family: 'Montserrat', sans-serif; font-weight: 200; letter-spacing: 0.35em; color: var(--highlight-color); opacity: 0.8; text-transform: uppercase; text-shadow: 0 0 10px var(--bg-color), 0 0 5px var(--bg-color); }
@@ -1509,6 +1513,7 @@
             .nav-item:nth-child(2),
             .nav-item:nth-child(3),
             .nav-item:nth-child(4) { margin-left: 0; }
+            .nav-item:nth-child(5) { margin-left: 0; }
             .nav-item { margin-bottom: 28px; }
             .nav-item:hover { transform: none; }
             .brand-identity { font-size: 48px; letter-spacing: 0.20em; }
@@ -1644,6 +1649,7 @@
             .nav-item:nth-child(2).awakened { transition-delay: 1.4s; }
             .nav-item:nth-child(3).awakened { transition-delay: 2.4s; }
             .nav-item:nth-child(4).awakened { transition-delay: 3.4s; }
+            .nav-item:nth-child(5).awakened { transition-delay: 4.4s; }
 
             /* —— 关键:让字母停在"终点"状态(读 --fx/--fy/--fr),保留 splitLetters
                   设的手写抖动,但不参与任何字母级动画。Safari 只需要静态渲染。 —— */
@@ -1731,6 +1737,7 @@
             .nav-item:nth-child(2) { margin-right: 24px; }
             .nav-item:nth-child(3) { margin-right: 48px; }
             .nav-item:nth-child(4) { margin-right: 0; }   /* Catching frequencies / Audio:贴最右 */
+            .nav-item:nth-child(5) { margin-right: 20px; }
             .nav-en, .nav-sub {
                 /* nav-en 和 nav-sub 是 .nav-item 的 column 子元素,
                    align-self: flex-end 保证它们在垂直 flex 容器里靠右贴齐 */
@@ -2335,8 +2342,7 @@
            A left-edge cream gradient overlay melts them into the
            paper-cream text column on the left. Zero JS, two image
            requests totalling ~400 KB. */
-        .scu-cabinet-wrap::before,
-        .scu-cabinet-wrap::after {
+        .scu-cabinet-wrap::before {
             content: '';
             position: fixed;
             top: 0; bottom: 0;
@@ -2367,22 +2373,7 @@
             background-repeat: no-repeat, no-repeat, no-repeat;
             opacity: 0.62;
         }
-        .scu-cabinet-wrap::after {
-            /* forest-floor accent — soft bottom-right corner whisper */
-            right: 0; bottom: 0; top: auto;
-            width: 42vw; height: 60vh;
-            background:
-                radial-gradient(ellipse 80% 70% at 85% 75%,
-                    rgba(235,227,210,0) 0%,
-                    rgba(235,227,210,0.4) 55%,
-                    rgba(235,227,210,0.95) 90%),
-                url('images/scu-bg/forest-floor.jpg');
-            background-size: auto, cover;
-            background-position: center, center;
-            background-repeat: no-repeat, no-repeat;
-            opacity: 0.55;
-            mix-blend-mode: multiply;
-        }
+        /* (removed) forest-floor accent in the bottom-right corner */
         /* make sure cards & mist sit ABOVE the backdrop */
         .scu-cabinet { position: relative; z-index: 1; }
         .scu-mist { z-index: 2; }
@@ -2757,6 +2748,46 @@
                 0 30px 60px -20px rgba(40,35,20,0.30),
                 0 10px 24px -8px rgba(40,35,20,0.18);
         }
+        /* ── 3D viewer stage — replaces the flat figure image ───────── */
+        .scu-3d-stage{ position:relative; width:100%; aspect-ratio:3/3.4;
+            border-radius:3px; overflow:hidden; cursor:grab;
+            background:
+              radial-gradient(120% 100% at 50% 18%, rgba(60,54,38,0.55) 0%, rgba(24,21,15,0.9) 55%, rgba(14,12,8,1) 100%);
+            box-shadow:0 40px 80px -28px rgba(20,16,8,0.6), inset 0 0 90px rgba(0,0,0,0.55); }
+        .scu-3d-stage:active{ cursor:grabbing; }
+        .scu-3d-stage canvas{ display:block; width:100%; height:100%; touch-action:none; }
+        .scu-3d-hint{ position:absolute; left:0; right:0; bottom:16px; text-align:center;
+            font-family:'Montserrat',sans-serif; font-weight:300; font-size:8.5px; letter-spacing:.4em;
+            text-transform:uppercase; color:rgba(216,186,120,.6); pointer-events:none;
+            opacity:0; transition:opacity 1.2s ease 1.2s; }
+        .scu-detail.active .scu-3d-hint{ opacity:1; }
+        .scu-3d-loading{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+        .scu-3d-loading span{ width:30px; height:30px; border-radius:50%;
+            border:1px solid rgba(216,186,120,.25); border-top-color:rgba(216,186,120,.9);
+            animation:scu3dspin 1s linear infinite; opacity:0; transition:opacity .3s; }
+        .scu-3d-stage.loading .scu-3d-loading span{ opacity:1; }
+        @keyframes scu3dspin{ to{ transform:rotate(360deg); } }
+        /* ── THE VITRINE — 3D shelf gallery replacing the card cabinet ── */
+        .scu-vitrine{ position:relative; width:100%; height:100%; min-height:78vh;
+            cursor:grab; overflow:hidden; background:transparent; }
+        .scu-vitrine:active{ cursor:grabbing; }
+        .scu-vitrine canvas{ display:block; width:100%; height:100%; touch-action:none; }
+        .scu-shelf-name{ position:absolute; left:0; right:0; bottom:54px; text-align:center;
+            font-family:'Cormorant Garamond',serif; font-style:italic; font-weight:300;
+            font-size:clamp(20px,2.4vw,34px); color:var(--primary-color,#1a160f);
+            opacity:0; transform:translateY(8px); transition:opacity .5s ease, transform .5s ease;
+            pointer-events:none; }
+        .scu-shelf-name.show{ opacity:.9; transform:translateY(0); }
+        .scu-shelf-hint{ position:absolute; left:0; right:0; bottom:26px; text-align:center;
+            font-family:'Montserrat',sans-serif; font-weight:300; font-size:8.5px; letter-spacing:.4em;
+            text-transform:uppercase; color:rgba(90,75,55,.5); pointer-events:none;
+            opacity:0; transition:opacity 1.2s ease 1.4s; }
+        #level-scu.active .scu-shelf-hint{ opacity:1; }
+        .scu-shelf-loading{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+        .scu-shelf-loading span{ width:32px; height:32px; border-radius:50%;
+            border:1px solid rgba(140,115,80,.25); border-top-color:rgba(140,115,80,.85);
+            animation:scu3dspin 1s linear infinite; opacity:0; transition:opacity .3s; }
+        .scu-vitrine.loading .scu-shelf-loading span{ opacity:1; }
         .scu-detail-figure-caption {
             margin-top: 14px;
             font-family: 'Montserrat', sans-serif;
@@ -2764,6 +2795,65 @@
             text-transform: uppercase;
             color: rgba(80,65,45,0.55);
             text-align: right;
+        }
+
+        /* ── FULL 3D VIEWER inside the detail page — "hold it in the light" ── */
+        .scu-360{
+            max-width: 1100px;
+            margin: 7vh auto 9vh;
+            padding: 0 6vw;
+            opacity: 0; transform: translateY(24px);
+            transition: opacity 1.6s ease 1.1s, transform 1.6s ease 1.1s;
+        }
+        .scu-detail.active .scu-360{ opacity: 1; transform: translateY(0); }
+        .scu-360-head{ text-align: center; margin-bottom: 26px; }
+        .scu-360-eyebrow{
+            font-family: 'Montserrat', sans-serif; font-weight: 300;
+            font-size: 10px; letter-spacing: 0.55em; text-transform: uppercase;
+            color: var(--highlight-color); margin-bottom: 14px;
+        }
+        .scu-360-title{
+            font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 300;
+            font-size: 34px; line-height: 1.1; color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .scu-360-sub{
+            font-family: 'Cormorant Garamond', serif; font-size: 16px;
+            color: rgba(80,65,45,0.62); max-width: 460px; margin: 0 auto;
+        }
+        .scu-360-stage{
+            position: relative; width: 100%;
+            height: min(74vh, 680px); min-height: 420px;
+            margin-top: 30px;
+            cursor: grab; overflow: hidden;
+            /* ambient atmosphere injected per-specimen via --aura-1 / --aura-2;
+               soft, borderless, dissolving into the page. */
+            background:
+                radial-gradient(ellipse 58% 52% at 50% 42%, var(--aura-1, rgba(255,255,255,0.45)), transparent 72%),
+                radial-gradient(ellipse 80% 70% at 78% 18%, var(--aura-2, rgba(200,200,200,0.18)), transparent 70%),
+                radial-gradient(ellipse 70% 60% at 16% 88%, var(--aura-2, rgba(200,200,200,0.12)), transparent 72%);
+            -webkit-mask-image: radial-gradient(ellipse 86% 86% at 50% 48%, #000 60%, transparent 100%);
+                    mask-image: radial-gradient(ellipse 86% 86% at 50% 48%, #000 60%, transparent 100%);
+            transition: background 1.4s ease;
+        }
+        .scu-360-stage:active{ cursor: grabbing; }
+        .scu-360-stage canvas{ display:block; width:100%; height:100%; touch-action:none; }
+        .scu-360-loading{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+        .scu-360-loading span{ width:30px; height:30px; border-radius:50%;
+            border:1px solid rgba(140,115,80,.25); border-top-color:rgba(140,115,80,.85);
+            animation:scu3dspin 1s linear infinite; opacity:0; transition:opacity .3s; }
+        .scu-360-stage.loading .scu-360-loading span{ opacity:1; }
+        .scu-360-hint{
+            position:absolute; left:0; right:0; bottom:18px; text-align:center;
+            font-family:'Montserrat',sans-serif; font-weight:300; font-size:8.5px;
+            letter-spacing:.4em; text-transform:uppercase; color:rgba(90,75,55,.5);
+            pointer-events:none; opacity:0; transition:opacity 1s ease;
+        }
+        .scu-detail.active .scu-360-hint{ opacity:1; }
+        @media (max-width: 720px){
+            .scu-360{ padding: 0 6vw; }
+            .scu-360-title{ font-size: 26px; }
+            .scu-360-stage{ height: 60vh; min-height: 340px; }
         }
 
         .scu-detail-text {
@@ -12949,7 +13039,702 @@
             .aud-tracks .track-name { display: none; }
         }
 
+
+
+
+
+
+
+        /* ================================================================ */
+        /* ===== LEVEL-INSTALLATION v8 — A Walk Into the Forest ========== */
+        /* ===== descent journey · light you carry · the body in the wood = */
+        /* ================================================================ */
+        #level-ins{
+            --ink:#0b0a06; --ink-2:#13110a;
+            --paper:#efe6d2; --paper-soft:rgba(239,230,210,.6); --paper-faint:rgba(239,230,210,.32);
+            --gold:#d8ba78; --gold-deep:#a8853f; --moss:#5d6a45; --moss-deep:#39432b; --rust:#7a4a2c;
+            position:fixed; inset:0; z-index:50; display:none; overflow:hidden;
+            background:var(--ink); color:var(--paper);
+            font-family:'EB Garamond',Georgia,serif; -webkit-font-smoothing:antialiased;
+        }
+        #level-ins *{box-sizing:border-box;}
+
+        /* The scroller is the forest. Depth is faked with a fixed canopy→floor
+           gradient sky behind, scenes scrolling in front. */
+        #level-ins .forest{position:absolute; inset:0; overflow-y:auto; overflow-x:hidden; z-index:3;}
+        #level-ins .forest::-webkit-scrollbar{width:0;}
+
+        /* fixed atmospheric sky that darkens as you descend (driven by JS var --depth 0..1) */
+        #level-ins .ins-sky{position:fixed; inset:0; z-index:0; pointer-events:none;
+            background:linear-gradient(180deg,
+                rgba(34,40,24,calc(.55 - var(--depth,0)*.5)) 0%,
+                rgba(24,28,16,calc(.4 + var(--depth,0)*.18)) 32%,
+                rgba(17,18,11,calc(.62 + var(--depth,0)*.3)) 58%,
+                rgba(13,13,8,calc(.82 + var(--depth,0)*.18)) 78%,
+                rgba(11,10,6,1) 100%);
+            transition:background .2s linear;}
+        /* canopy light shafts from the top, fade as you go down */
+        #level-ins .ins-shafts{position:fixed; inset:0; z-index:1; pointer-events:none; mix-blend-mode:screen;
+            opacity:calc(.7 - var(--depth,0)*.7);
+            background:repeating-linear-gradient(102deg,
+                rgba(216,186,120,.06) 0px, rgba(216,186,120,.06) 3px, transparent 3px, transparent 30px);
+            -webkit-mask-image:radial-gradient(90% 70% at 60% -8%, #000 0%, transparent 64%);
+                    mask-image:radial-gradient(90% 70% at 60% -8%, #000 0%, transparent 64%);
+            animation:insShaft 11s ease-in-out infinite;}
+        @keyframes insShaft{0%,100%{transform:translateX(0); opacity:.85}50%{transform:translateX(-14px); opacity:1}}
+
+        /* the light you carry — a torch glued to the cursor, the ONLY way the
+           deep-forest scenes become visible */
+        #level-ins .ins-torch{position:fixed; left:50%; top:50%; z-index:90; pointer-events:none;
+            width:60vmax; height:60vmax; margin:-30vmax 0 0 -30vmax; border-radius:50%;
+            background:radial-gradient(circle, rgba(216,186,120,.14) 0%, rgba(216,186,120,.05) 26%, transparent 58%);
+            mix-blend-mode:screen; opacity:0; transition:opacity 1.4s ease; will-change:transform;}
+        #level-ins.active .ins-torch{opacity:1;}
+
+        /* drifting spores / dust */
+        #level-ins .ins-spores{position:fixed; inset:0; z-index:2; pointer-events:none;}
+        #level-ins .spore{position:absolute; border-radius:50%; background:rgba(216,186,120,.5); filter:blur(.5px);
+            opacity:0; animation:insSpore linear infinite;}
+        @keyframes insSpore{0%{opacity:0; transform:translateY(30px) translateX(0)}14%{opacity:.7}86%{opacity:.4}100%{opacity:0; transform:translateY(-140px) translateX(36px)}}
+
+        /* grain */
+        #level-ins .ins-grain{position:fixed; inset:-8%; z-index:95; pointer-events:none; opacity:.05;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            will-change:transform; contain:strict;
+            animation:insGrain 8s steps(6) infinite;}
+        @keyframes insGrain{0%{transform:translate(0,0)}25%{transform:translate(-4%,3%)}50%{transform:translate(3%,-4%)}75%{transform:translate(-3%,4%)}100%{transform:translate(0,0)}}
+
+        /* light-ring cursor */
+        #level-ins .ins-cur{position:fixed; top:0; left:0; z-index:9000; pointer-events:none; opacity:0;
+            width:30px; height:30px; margin:-15px 0 0 -15px; border-radius:50%;
+            border:1px solid rgba(216,186,120,.5); box-shadow:0 0 22px 4px rgba(216,186,120,.12);
+            transition:width .4s cubic-bezier(.2,.7,.2,1), height .4s cubic-bezier(.2,.7,.2,1), opacity .5s ease;}
+        #level-ins.active .ins-cur{opacity:1;}
+        #level-ins .ins-cur.lit{width:60px; height:60px; margin:-30px 0 0 -30px;}
+        body.ins-cursor-hide{cursor:none;}
+
+        /* chrome */
+        .ins-back{position:fixed; top:32px; left:40px; z-index:200; font-family:'Montserrat',sans-serif;
+            font-weight:300; font-size:11px; letter-spacing:.34em; color:rgba(239,230,210,.55); cursor:pointer;
+            text-transform:uppercase; transition:.4s;}
+        .ins-back:hover{color:#efe6d2; letter-spacing:.46em;}
+        .ins-folio{position:fixed; bottom:26px; right:38px; z-index:200; font-family:'Montserrat',sans-serif;
+            font-weight:300; font-size:9px; letter-spacing:.42em; color:rgba(239,230,210,.3); text-transform:uppercase;}
+        /* depth gauge — a vertical line on the right that fills as you descend */
+        .ins-depth{position:fixed; top:18vh; bottom:18vh; right:46px; width:1px; z-index:200;
+            background:rgba(239,230,210,.12);}
+        .ins-depth .fill{position:absolute; left:0; top:0; width:1px; height:0%;
+            background:linear-gradient(180deg, var(--gold), var(--moss)); box-shadow:0 0 8px rgba(216,186,120,.4); transition:height .12s linear;}
+        .ins-depth .mark{position:absolute; right:8px; transform:translateY(-50%); white-space:nowrap;
+            font-family:'Montserrat',sans-serif; font-weight:300; font-size:7.5px; letter-spacing:.28em;
+            text-transform:uppercase; color:rgba(239,230,210,.28);}
+        @media (max-width:900px){ .ins-depth{display:none;} }
+
+        .ins-content{opacity:0; transition:opacity 1.6s ease; position:relative; z-index:4;}
+        #level-ins.active .ins-content{opacity:1;}
+
+        /* generic scene = full viewport, image as living environment */
+        .scene{position:relative; min-height:100vh; width:100%; overflow:hidden;
+            display:flex; align-items:center; justify-content:center;}
+        .scene-img{position:absolute; inset:-8% -4%; background-size:cover; background-position:center;
+            will-change:transform; z-index:0;}
+        .scene-shade{position:absolute; inset:0; z-index:1; pointer-events:none;}
+
+        /* full-bleed scenes ease their image + caption in instead of popping */
+        .sc-approach .scene-img,.sc-elder .scene-img,.sc-grass .scene-img,.sc-metal .scene-img{
+            opacity:0; transition:opacity 1.6s ease, filter 1.6s ease;}
+        .sc-approach.in-view .scene-img,.sc-elder.in-view .scene-img,
+        .sc-grass.in-view .scene-img,.sc-metal.in-view .scene-img{opacity:1;}
+        .sc-approach .scene-cap,.sc-elder .scene-cap{opacity:0; transform:translateY(20px);
+            transition:opacity 1.5s ease .4s, transform 1.5s cubic-bezier(.16,1,.3,1) .4s;}
+        .sc-approach.in-view .scene-cap,.sc-elder.in-view .scene-cap{opacity:1; transform:translateY(0);}
+
+        /* ---------- 00 · CANOPY (entrance) ---------- */
+        /* DESKTOP — full-bleed dissolve. The photo's two natures (the pale
+           carved body, the rough living tree) are stacked edge-to-edge and
+           MELT into one another across a tall soft mid-band: no hard line,
+           no black bars, no contain-shrink. Each half is the full frame,
+           feather-masked so where they meet they cross-dissolve — the body
+           literally becoming the tree. Immersive, full screen. */
+        /* ONE full-bleed image. No split, no mid-seam. The cover photo fills
+           a tall stage (120vh) so there is real vertical room; it enters with
+           a calm fade + slow scale settle, and its lower third dissolves down
+           into the descending dark over a long, soft gradient — no compressed
+           black wall, no dividing line. */
+        .sc-canopy{position:relative; min-height:100vh; display:block; padding:0; overflow:hidden;}
+        .sc-canopy .scene-img,
+        .sc-canopy .scene-shafts{display:none;}
+
+        .seam-stage{position:relative; width:100%; height:193vw; max-height:none; z-index:2; overflow:hidden;}
+        .seam-stage .bg{position:absolute; inset:0;
+            background-image:url('installation/reversibility/cover-hero.jpg');
+            background-repeat:no-repeat; background-size:100% auto; background-position:center top;
+            filter:brightness(.94) saturate(1.0) contrast(1.06);
+            opacity:0; transition:opacity 2.2s ease .15s; will-change:opacity;}
+        #level-ins.active .sc-canopy .seam-stage .bg{opacity:1;}
+        /* GROWTH CURTAIN — a dark veil over the not-yet-grown lower image.
+           Starts covering everything below ~46% of the photo, then slides
+           DOWN as you scroll (--cg 0→1), uncovering the tree like it grows in.
+           transform is GPU-cheap and always animatable (unlike mask calc). */
+        .seam-grow{position:absolute; left:0; right:0; top:0; height:100%; z-index:2; pointer-events:none;
+            transform:translate3d(0,46vh,0);
+            background:linear-gradient(180deg,
+                transparent 0%, rgba(11,10,6,.35) 5%, rgba(11,10,6,.82) 14%, var(--ink,#0b0a06) 26%, var(--ink,#0b0a06) 100%);
+            will-change:transform;}
+        /* a final soft dissolve at the very bottom so the growth melts into dark */
+        .seam-stage .bg-foot{position:absolute; left:0; right:0; bottom:0; height:24%; z-index:2; pointer-events:none;
+            background:linear-gradient(180deg, transparent 0%, rgba(11,10,6,.4) 60%, rgba(11,10,6,.72) 100%);}
+
+        /* ATMOSPHERE — all additive, the photo is never altered */
+        /* a shaft of skylight that slips down the trunk, breathing */
+        .seam-skylight{position:absolute; top:0; left:50%; width:64vw; height:80vh; z-index:4; pointer-events:none;
+            transform:translateX(-50%); mix-blend-mode:screen; opacity:0;
+            background:radial-gradient(ellipse 40% 60% at 50% 0%, rgba(255,243,206,.18), rgba(255,243,206,.05) 38%, transparent 68%);
+            transition:opacity 2.4s ease 1s; animation:skyBreathe 11s ease-in-out infinite 2s;}
+        #level-ins.active .sc-canopy .seam-skylight{opacity:1;}
+        @keyframes skyBreathe{0%,100%{opacity:.7; transform:translateX(-50%) translateY(0)}50%{opacity:1; transform:translateX(-50%) translateY(2vh)}}
+        /* cold mist that rises in the lower (inverted-sky) half as you descend */
+        .seam-mist{position:absolute; left:0; right:0; bottom:0; height:62%; z-index:4; pointer-events:none;
+            mix-blend-mode:screen; opacity:calc(var(--cg,0) * .8);
+            background:radial-gradient(120% 80% at 50% 100%, rgba(150,176,190,.16), rgba(150,176,190,.05) 42%, transparent 72%);}
+        /* drifting motes of light */
+        .seam-motes{position:absolute; inset:0; z-index:5; pointer-events:none; overflow:hidden;}
+        .seam-motes i{position:absolute; width:3px; height:3px; border-radius:50%; background:rgba(255,243,206,.6);
+            filter:blur(.4px); opacity:0; animation:moteDrift linear infinite;}
+        @keyframes moteDrift{0%{opacity:0; transform:translateY(40px) translateX(0)}12%{opacity:.7}80%{opacity:.4}100%{opacity:0; transform:translateY(-180px) translateX(40px)}}
+
+        /* an ambient warm light that drifts with the cursor across the scene —
+           atmosphere only, no longer marking any seam. */
+        .seam-glow{position:absolute; top:42%; width:54vw; height:44vh; z-index:5; pointer-events:none;
+            transform:translate(-50%,-50%); left:50%;
+            background:radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,238,196,.12), transparent 70%);
+            mix-blend-mode:screen; opacity:0; transition:opacity 2s ease 1.6s; will-change:transform;}
+        #level-ins.active .sc-canopy .seam-glow{opacity:1;}
+
+        /* legacy seam bits fully retired */
+        .seam-line,.seam-tags{display:none !important;}
+
+        /* gentle vignette + LONG bottom dissolve into the dark (uses the tall
+           stage's extra height as the runway). */
+        .sc-canopy .scene-shade{z-index:3; pointer-events:none; position:absolute; inset:0; background:
+            radial-gradient(110% 30% at 50% 18%, transparent 66%, rgba(11,10,6,.18) 100%),
+            linear-gradient(180deg,
+                rgba(11,10,6,.3) 0%, transparent 8%,
+                transparent 88%,
+                rgba(11,10,6,.45) 95%,
+                rgba(11,10,6,.72) 100%);}
+
+        /* title — centred low, "of the Same Flesh" sitting in the melt */
+        .canopy-txt{position:absolute; z-index:7; left:0; right:0; top:58vh; text-align:center;
+            padding:0 6vw; max-width:none;}
+        .canopy-kick{font-family:'Montserrat',sans-serif; font-weight:300; font-size:10px; letter-spacing:.62em;
+            text-transform:uppercase; color:var(--gold); margin-bottom:22px; display:flex; align-items:center; justify-content:center; gap:16px;
+            opacity:0; transform:translateY(12px); transition:all 1.3s ease .6s;}
+        .canopy-kick::before,.canopy-kick::after{content:''; width:34px; height:1px; background:var(--gold-deep); opacity:.7;}
+        #level-ins.active .canopy-kick{opacity:1; transform:translateY(0);}
+        .canopy-title{font-family:'EB Garamond',serif; font-size:clamp(40px,6.6vw,124px); font-weight:400; line-height:.94;
+            letter-spacing:-.012em; color:#f3ebd8; text-shadow:0 8px 70px rgba(0,0,0,.9); margin:0;}
+        .canopy-title .l2{display:block; font-style:italic; font-weight:500; color:rgba(243,235,216,.9);}
+        .canopy-title .w{display:inline-block; opacity:0; transform:translateY(46px); filter:blur(14px);
+            transition:opacity 1.7s ease, transform 1.7s cubic-bezier(.16,1,.3,1), filter 1.7s ease;}
+        #level-ins.active .canopy-title .w{opacity:1; transform:translateY(0); filter:blur(0);}
+        #level-ins.active .canopy-title .w:nth-child(1){transition-delay:.7s}
+        #level-ins.active .canopy-title .w:nth-child(2){transition-delay:.84s}
+        #level-ins.active .canopy-title .w:nth-child(3){transition-delay:.98s}
+        #level-ins.active .canopy-title .w:nth-child(4){transition-delay:1.12s}
+        #level-ins.active .canopy-title .w:nth-child(5){transition-delay:1.26s}
+        .canopy-sub{margin:22px auto 0; max-width:560px; font-size:clamp(15px,1.5vw,20px); font-style:italic;
+            color:var(--paper-soft); line-height:1.55; text-shadow:0 2px 22px rgba(0,0,0,.9);
+            opacity:0; transition:opacity 1.7s ease 1.8s;}
+        #level-ins.active .canopy-sub{opacity:1;}
+        .canopy-cue{position:absolute; left:50%; transform:translateX(-50%); top:calc(100vh - 86px); z-index:7; display:flex; flex-direction:column; align-items:center; gap:12px;
+            font-family:'Montserrat',sans-serif; font-weight:300; font-size:9px; letter-spacing:.42em; text-transform:uppercase;
+            color:var(--paper-faint); opacity:0; transition:opacity 1.4s ease 2.6s;}
+        #level-ins.active .canopy-cue{opacity:1;}
+        .canopy-cue .bar{position:relative; width:1px; height:42px; overflow:hidden; background:rgba(216,186,120,.18);}
+        .canopy-cue .bar::after{content:''; position:absolute; left:0; top:-42px; width:1px; height:42px;
+            background:linear-gradient(rgba(216,186,120,0),var(--gold)); animation:insCue 2.4s cubic-bezier(.6,0,.4,1) infinite;}
+        @keyframes insCue{0%{top:-42px}64%,100%{top:42px}}
+
+        /* ---------- spoken lines between scenes ---------- */
+        .ins-line{padding:20vh 12vw; max-width:1100px; margin:0 auto; text-align:center; position:relative; z-index:4;}
+        .ins-line p{font-family:'EB Garamond',serif; font-size:clamp(22px,3vw,46px); font-weight:400; font-style:italic;
+            line-height:1.5; color:rgba(239,230,210,.86); letter-spacing:.004em;
+            opacity:0; transform:translateY(26px); filter:blur(8px); transition:opacity 1.6s ease, transform 1.6s ease, filter 1.6s ease;}
+        .ins-line.in-view p{opacity:1; transform:translateY(0); filter:blur(0);}
+        .ins-line em{color:var(--gold);}
+        .ins-line .roman{display:block; font-family:'Montserrat',sans-serif; font-style:normal; font-weight:300;
+            font-size:9px; letter-spacing:.5em; text-transform:uppercase; color:var(--gold); margin-bottom:26px; opacity:.0;
+            transition:opacity 1.4s ease;}
+        .ins-line.in-view .roman{opacity:.85;}
+
+        /* ============================================================
+           DRIFT — quiet stream-of-consciousness text. Small, dispersed,
+           set to the SIDE so the image breathes. Serves the work; does
+           not explain it. Long passages break into staggered fragments
+           that fade in one after another. Reuses the site's fonts/colors.
+           ============================================================ */
+        .ins-line.drift{padding:16vh 9vw; max-width:1200px; text-align:left;}
+        .ins-line.drift p{font-size:clamp(15px,1.45vw,22px); line-height:1.62; font-style:italic;
+            color:rgba(239,230,210,.72); max-width:34ch; margin:0;}
+        .ins-line.drift.right{text-align:right;} .ins-line.drift.right p{margin-left:auto;}
+        /* fragments inside a drift/caption: each on its own offset, staggered reveal */
+        .frag{display:block; opacity:0; transform:translateY(14px); filter:blur(5px);
+            transition:opacity 1.4s ease, transform 1.4s ease, filter 1.4s ease;}
+        .in-view .frag{opacity:1; transform:translateY(0); filter:blur(0);}
+        .in-view .frag.f2{transition-delay:.5s;} .in-view .frag.f3{transition-delay:1s;}
+        .in-view .frag.f4{transition-delay:1.5s;}
+        .frag.indent{margin-left:14%;} .frag.indent2{margin-left:26%;}
+        .frag.tail{margin-left:auto; text-align:right; max-width:30ch;}
+        /* shrink the over-large scene captions that now hold longer text,
+           and pin them to a corner instead of dead-center over the subject */
+        #level-ins .sc-grass .scene-q, #level-ins .sc-metal .scene-q{max-width:26ch !important; padding:0 !important; text-align:left !important;
+            position:absolute !important; left:7vw !important; right:auto !important; top:auto !important; bottom:11vh !important; margin:0 !important; z-index:5;}
+        #level-ins .sc-grass .scene-q p, #level-ins .sc-metal .scene-q p{font-size:clamp(14px,1.35vw,20px) !important;
+            line-height:1.62 !important; color:rgba(243,235,216,.82) !important; max-width:26ch !important; text-shadow:0 2px 20px rgba(0,0,0,.95);}
+        .sc-grass .scene-q .frag, .sc-metal .scene-q .frag{display:block;}
+        #level-ins .sc-approach .scene-cap{left:7vw !important; right:auto !important; bottom:10vh !important; transform:none !important; text-align:left !important; max-width:28ch !important; z-index:5;}
+        #level-ins .sc-elder .scene-cap{left:auto !important; right:7vw !important; bottom:10vh !important; transform:none !important; text-align:right !important; max-width:28ch !important; z-index:5;}
+        #level-ins .sc-approach .scene-cap .roman{text-align:left !important;}
+        #level-ins .sc-approach .scene-cap .t, #level-ins .sc-elder .scene-cap .t{font-size:clamp(14px,1.35vw,20px) !important;
+            line-height:1.58 !important; max-width:28ch !important; color:rgba(243,235,216,.84) !important;}
+        /* chiasm long lines → smaller, narrower, dispersed */
+        .ch-line.drift{padding:18vh 10vw; max-width:1100px; text-align:left;}
+        .ch-line.drift p{font-size:clamp(15px,1.5vw,23px) !important; line-height:1.6; max-width:36ch; color:rgba(233,224,204,.74);}
+        .ch-line.drift.right{text-align:right;} .ch-line.drift.right p{margin-left:auto;}
+        @media (max-width:900px){
+            .sc-grass .scene-q, .sc-metal .scene-q{position:relative; left:auto; bottom:auto; padding:0 8vw; max-width:100%;}
+            .sc-approach .scene-cap, .sc-elder .scene-cap{position:absolute; right:auto; left:50%; transform:translateX(-50%); text-align:center; max-width:84vw;}
+            .frag.indent,.frag.indent2,.frag.tail{margin-left:0; text-align:left;}
+        }
+
+        .sc-approach .scene-img{background-image:url('installation/reversibility/hero.jpg'); filter:brightness(.86) saturate(.96);
+            transform:scale(1.12);}
+        .sc-approach .scene-shade{background:
+            radial-gradient(85% 95% at 60% 52%, transparent 42%, rgba(11,10,6,.4) 84%, rgba(11,10,6,.82) 100%),
+            linear-gradient(180deg, rgba(11,10,6,.55) 0%, transparent 22%, transparent 70%, rgba(11,10,6,.8) 100%);}
+        .sc-approach .scene-cap{position:absolute; left:50%; bottom:9vh; transform:translateX(-50%); z-index:4; text-align:center;}
+        .sc-approach .scene-cap .roman{font-family:'Montserrat',sans-serif; font-weight:300; font-size:9px; letter-spacing:.5em;
+            text-transform:uppercase; color:var(--gold); margin-bottom:14px;}
+        .sc-approach .scene-cap .t{font-style:italic; font-size:clamp(18px,2vw,28px); color:rgba(243,235,216,.92);
+            text-shadow:0 3px 26px rgba(0,0,0,.8); max-width:34ch; line-height:1.4;}
+
+        /* ---------- 02 · THROUGH THE TREES (horizontal walk) ---------- */
+        .sc-walk{flex-direction:column; align-items:stretch; justify-content:center; padding:14vh 0;}
+        .sc-walk .walk-head{padding:0 8vw 6vh; display:flex; align-items:flex-end; justify-content:space-between; gap:4vw;
+            opacity:0; transform:translateY(24px); transition:opacity 1.4s ease, transform 1.4s ease;}
+        .sc-walk.in-view .walk-head{opacity:1; transform:translateY(0);}
+        .sc-walk .walk-head h3{font-family:'EB Garamond',serif; font-size:clamp(24px,3vw,44px); font-weight:400; font-style:italic;
+            color:#f1e7d4; margin:0; line-height:1.1;}
+        .sc-walk .walk-head .lbl{font-family:'Montserrat',sans-serif; font-weight:300; font-size:9px; letter-spacing:.4em;
+            text-transform:uppercase; color:var(--gold); white-space:nowrap; padding-bottom:8px;}
+        .walk-rail{display:flex; gap:3vw; padding:0 8vw; overflow-x:auto; cursor:grab; scrollbar-width:none; align-items:center;}
+        .walk-rail::-webkit-scrollbar{display:none;}
+        .walk-rail.drag{cursor:grabbing;}
+        .walk-rail figure{flex:0 0 auto; margin:0; position:relative;
+            opacity:0; transform:translateY(34px);
+            transition:opacity 1.2s ease, transform 1.2s cubic-bezier(.16,1,.3,1);}
+        .sc-walk.in-view .walk-rail figure{opacity:1; transform:translateY(0);}
+        .sc-walk.in-view .walk-rail figure:nth-of-type(1){transition-delay:.15s}
+        .sc-walk.in-view .walk-rail figure:nth-of-type(2){transition-delay:.30s}
+        .sc-walk.in-view .walk-rail figure:nth-of-type(3){transition-delay:.45s}
+        .sc-walk.in-view .walk-rail figure:nth-of-type(4){transition-delay:.60s}
+        .sc-walk.in-view .walk-rail figure:nth-of-type(5){transition-delay:.75s}
+        .sc-walk.in-view .walk-rail figure:nth-of-type(6){transition-delay:.90s}
+        .walk-rail .walk-interlude{opacity:0; transition:opacity 1.4s ease .5s;}
+        .sc-walk.in-view .walk-rail .walk-interlude{opacity:.85;}
+        .walk-rail figure img{display:block; height:64vh; width:auto; max-width:none; object-fit:cover;
+            filter:brightness(.82) contrast(1.08); box-shadow:0 36px 70px -30px rgba(0,0,0,.8);
+            transition:transform .9s cubic-bezier(.16,1,.3,1), filter .9s ease;}
+        .walk-rail figure:hover img{transform:translateY(-10px); filter:brightness(1.0) contrast(1.1);}
+        .walk-rail figure figcaption{margin-top:16px; font-family:'Montserrat',sans-serif; font-weight:300; font-size:8.5px;
+            letter-spacing:.32em; text-transform:uppercase; color:var(--paper-faint);}
+        .walk-rail figure.near img{height:74vh;}
+        .walk-rail .walk-interlude{flex:0 0 auto; max-width:24ch; padding:0 2vw; text-align:center;
+            font-family:'EB Garamond',serif; font-style:italic; font-size:clamp(18px,1.8vw,26px); line-height:1.4; color:var(--gold);}
+        .walk-rail .walk-interlude::before,.walk-rail .walk-interlude::after{content:''; display:block; width:34px; height:1px;
+            background:var(--gold); opacity:.4; margin:18px auto;}
+
+        /* ---------- 03 · SWALLOWED (grass, near-lost) ---------- */
+        .sc-grass .scene-img{background-image:url('installation/reversibility/env-grass2.jpg'); filter:brightness(.62) saturate(.9);}
+        .sc-grass .scene-shade{background:linear-gradient(180deg, rgba(11,10,6,.5) 0%, transparent 30%, transparent 56%, rgba(11,10,6,.92) 100%);}
+        .sc-grass .scene-q{position:relative; z-index:4; max-width:920px; padding:0 10vw; text-align:center;}
+        .sc-grass .scene-q p{font-family:'EB Garamond',serif; font-style:italic; font-weight:400; font-size:clamp(20px,2.8vw,42px);
+            line-height:1.5; color:rgba(243,235,216,.94); text-shadow:0 4px 32px rgba(0,0,0,.8);
+            opacity:0; transform:translateY(24px); transition:opacity 1.6s ease, transform 1.6s ease;}
+        .sc-grass.in-view .scene-q p{opacity:1; transform:translateY(0);}
+
+        /* ---------- 04 · IN THE DARK (spotlight reveal, 02.jpg) ---------- */
+        .sc-dark{flex-direction:column; gap:3.4vh; padding:14vh 6vw;}
+        .dark-hint{font-family:'Montserrat',sans-serif; font-weight:300; font-size:10px; letter-spacing:.42em; text-transform:uppercase;
+            color:var(--gold); display:flex; align-items:center; gap:14px; position:relative; z-index:4;}
+        .dark-hint::before,.dark-hint::after{content:''; width:30px; height:1px; background:rgba(216,186,120,.4);}
+        .reveal{position:relative; max-width:62vw; max-height:80vh; overflow:hidden; cursor:none; z-index:4;}
+        .reveal img{display:block; max-height:80vh; max-width:62vw; width:auto; object-fit:contain; filter:brightness(1.04) contrast(1.08);}
+        .reveal .cover{position:absolute; inset:0; pointer-events:none;
+            background:radial-gradient(circle at 50% 52%, rgba(11,10,6,.55) 0%, rgba(8,7,4,.97) 44%, #060503 74%);
+            -webkit-mask-image:radial-gradient(circle var(--r,0px) at var(--mx,50%) var(--my,52%), transparent 0%, #000 78%);
+                    mask-image:radial-gradient(circle var(--r,0px) at var(--mx,50%) var(--my,52%), transparent 0%, #000 78%);}
+        .reveal .teaser{position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); width:30%; height:42%; pointer-events:none;
+            border-radius:50%; background:radial-gradient(circle, rgba(216,186,120,.12) 0%, transparent 70%); animation:insBreath 3.4s ease-in-out infinite;}
+        .reveal.touched .teaser{display:none;}
+        @keyframes insBreath{0%,100%{opacity:.35; transform:translate(-50%,-50%) scale(.9)}50%{opacity:.9; transform:translate(-50%,-50%) scale(1.08)}}
+        .reveal-cap{font-family:'Montserrat',sans-serif; font-weight:300; font-size:9px; letter-spacing:.3em; text-transform:uppercase;
+            color:var(--paper-faint); position:relative; z-index:4;}
+
+        /* ---------- 05 · THE MADE WORLD (metal, bw) ---------- */
+        .sc-metal .scene-img{background-image:url('installation/reversibility/env-metal-bw.jpg'); filter:grayscale(1) brightness(.6) contrast(1.2);}
+        .sc-metal .scene-shade{background:linear-gradient(180deg, rgba(11,10,6,.55) 0%, transparent 28%, transparent 60%, rgba(11,10,6,.92) 100%);}
+        .sc-metal .scene-q{position:relative; z-index:4; max-width:920px; padding:0 10vw; text-align:center;}
+        .sc-metal .scene-q p{font-family:'EB Garamond',serif; font-style:italic; font-size:clamp(20px,2.8vw,42px); line-height:1.5;
+            color:rgba(243,235,216,.94); text-shadow:0 4px 32px rgba(0,0,0,.8);
+            opacity:0; transform:translateY(24px); transition:opacity 1.6s ease, transform 1.6s ease;}
+        .sc-metal.in-view .scene-q p{opacity:1; transform:translateY(0);}
+
+        /* ---------- 06 · SAME ROOT (diptych: felled trunk / carved body) ---------- */
+        .sc-kin{min-height:104vh; padding:16vh 7vw; display:grid; grid-template-columns:1fr 1fr; gap:0; align-items:stretch; position:relative; z-index:4;}
+        .sc-kin .k-cell{position:relative; overflow:hidden; opacity:0; transition:opacity 1.8s ease;}
+        .sc-kin.in-view .k-cell{opacity:1;} .sc-kin.in-view .k-cell:nth-child(2){transition-delay:.3s;}
+        .sc-kin .k-cell img{width:100%; height:76vh; object-fit:cover; filter:brightness(.82) contrast(1.08);}
+        .sc-kin .k-label{position:absolute; bottom:20px; left:20px; font-family:'Montserrat',sans-serif; font-weight:300; font-size:9px;
+            letter-spacing:.34em; text-transform:uppercase; color:rgba(243,235,216,.82); text-shadow:0 2px 14px rgba(0,0,0,.85);}
+        .sc-kin .k-mid{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:3;
+            font-family:'EB Garamond',serif; font-style:italic; font-size:clamp(15px,1.4vw,20px); color:var(--gold);
+            background:rgba(11,10,6,.55); padding:8px 18px; letter-spacing:.04em; white-space:nowrap;
+            opacity:0; transition:opacity 1.6s ease .5s;}
+        .sc-kin.in-view .k-mid{opacity:1;}
+
+        /* ---------- 07 · BENEATH THE ELDER (env-bigtree full) ---------- */
+        .sc-elder .scene-img{background-image:url('installation/reversibility/env-bigtree.jpg'); filter:brightness(.62) saturate(.88);}
+        .sc-elder .scene-shade{background:radial-gradient(90% 90% at 50% 40%, transparent 36%, rgba(11,10,6,.6) 82%, rgba(11,10,6,.95) 100%);}
+        .sc-elder .scene-cap{position:absolute; left:50%; bottom:9vh; transform:translateX(-50%); z-index:4; text-align:center;}
+        .sc-elder .scene-cap .roman{font-family:'Montserrat',sans-serif; font-weight:300; font-size:9px; letter-spacing:.5em;
+            text-transform:uppercase; color:var(--gold); margin-bottom:14px;}
+        .sc-elder .scene-cap .t{font-style:italic; font-size:clamp(18px,2vw,28px); color:rgba(243,235,216,.92); text-shadow:0 3px 26px rgba(0,0,0,.8);}
+
+        /* ============ CHIASM — the mirror that looks back ============ */
+        /* A sibling work. The deepest, darkest point of the descent. The
+           silver only wakes where the cursor (or finger) passes — nature's
+           gaze returning across the glass. Branch + reflection interlace. */
+        #ch{--ch-paper:#e9e0cc; --ch-gold:#cdb074; --ch-silver:#aeb8c0;}
+        .sc-chiasm{position:relative; min-height:240vh; padding:0; display:block; overflow:hidden; z-index:4;}
+
+        /* opener — the grove, dimmed, with the title rising */
+        .ch-open{position:relative; height:108vh; overflow:hidden;}
+        /* seam between the two works — a calm dark breath, no hard cut */
+        .works-seam{position:relative; height:88vh; width:100%; z-index:4; overflow:hidden;
+            background:linear-gradient(180deg, var(--ink,#0b0a06) 0%, #100e09 42%, #0d0b07 72%, var(--ink,#0b0a06) 100%);
+            display:flex; align-items:center; justify-content:center;}
+        /* ACT TRANSITION — a title-card between the two movements of one
+           exhibition. Reveals on scroll: roman numeral, hairline, act title. */
+        .act-card{text-align:center; position:relative; z-index:2; padding:0 8vw;}
+        .act-card .act-no{font-family:'Montserrat',sans-serif; font-weight:300; font-size:10px;
+            letter-spacing:.66em; text-transform:uppercase; color:var(--gold);
+            opacity:0; transform:translateY(14px); transition:opacity 1.4s ease, transform 1.4s ease;}
+        .act-card .act-rule{width:1px; height:0; margin:30px auto; background:linear-gradient(var(--gold),transparent);
+            transition:height 1.6s ease .4s; opacity:.7;}
+        .act-card .act-name{font-family:'EB Garamond',serif; font-style:italic; font-weight:400;
+            font-size:clamp(26px,4vw,62px); line-height:1.1; color:rgba(243,235,216,.94); margin:0;
+            opacity:0; transform:translateY(20px); filter:blur(8px);
+            transition:opacity 1.6s ease .6s, transform 1.6s ease .6s, filter 1.6s ease .6s;}
+        .act-card .act-sub{font-family:'Montserrat',sans-serif; font-weight:300; font-size:10px;
+            letter-spacing:.42em; text-transform:uppercase; color:var(--paper-faint); margin-top:22px;
+            opacity:0; transition:opacity 1.4s ease 1s;}
+        .works-seam.in-view .act-no{opacity:.85; transform:translateY(0);}
+        .works-seam.in-view .act-rule{height:74px;}
+        .works-seam.in-view .act-name{opacity:1; transform:translateY(0); filter:blur(0);}
+        .works-seam.in-view .act-sub{opacity:.7;}
+        /* MINIMAL act seam — just two threads and a roman numeral; the
+           opening below carries the actual title, no need to repeat it. */
+        .act-card.minimal{display:flex; flex-direction:column; align-items:center; gap:32px; padding:0;}
+        .act-card.minimal .act-rule{width:1px; height:0; background:linear-gradient(rgba(216,186,120,.55),transparent);
+            transition:height 1.8s cubic-bezier(.16,1,.3,1) .2s; opacity:.7;}
+        .act-card.minimal .act-rule:last-child{background:linear-gradient(transparent,rgba(216,186,120,.55)); transition-delay:.6s;}
+        .works-seam.in-view .act-card.minimal .act-rule{height:90px;}
+        .act-card.minimal .act-no{font-family:'EB Garamond',serif; font-style:italic; font-weight:400;
+            font-size:clamp(36px,5vw,72px); letter-spacing:0; text-transform:none;
+            color:rgba(216,186,120,.6); margin:0; line-height:1;
+            opacity:0; transform:translateY(0); transition:opacity 1.6s ease .4s, color 1.6s ease .4s;}
+        .works-seam.in-view .act-card.minimal .act-no{opacity:1;}
+        /* a faint drifting numeral watermark behind the card */
+        .act-card .act-ghost{position:absolute; left:50%; top:50%; transform:translate(-50%,-54%);
+            font-family:'EB Garamond',serif; font-style:italic; font-size:clamp(180px,30vw,460px); line-height:1;
+            color:rgba(216,186,120,.045); z-index:-1; pointer-events:none; white-space:nowrap;
+            opacity:0; transition:opacity 2.2s ease .3s;}
+        .works-seam.in-view .act-ghost{opacity:1;}
+        @media (max-width:900px){ .works-seam{height:70vh;} }
+        .ch-open .ch-bg{position:absolute; inset:-3%;
+            background:url('installation/chiasm/08.jpg') center 42%/cover no-repeat;
+            filter:brightness(.5) saturate(.86) contrast(1.06);
+            opacity:0; transform:scale(1.04);
+            transition:opacity 2.6s ease, transform 3.4s cubic-bezier(.16,1,.3,1);
+            -webkit-mask-image:linear-gradient(180deg, transparent 0%, #000 14%, #000 48%, transparent 100%);
+                    mask-image:linear-gradient(180deg, transparent 0%, #000 14%, #000 48%, transparent 100%);}
+        .sc-chiasm.in-view .ch-open .ch-bg{opacity:1; transform:scale(1);}
+        .ch-open .ch-shade{position:absolute; inset:0; pointer-events:none; background:
+            radial-gradient(120% 90% at 50% 40%, transparent 50%, rgba(8,8,5,.5) 100%),
+            linear-gradient(180deg, rgba(8,8,5,.9) 0%, rgba(8,8,5,.35) 12%, transparent 34%, transparent 56%, rgba(8,8,5,.85) 82%, var(--ink,#0b0a06) 100%);}
+        .ch-open .ch-txt{position:absolute; left:0; right:0; bottom:16vh; text-align:center; padding:0 7vw; z-index:3;}
+        .ch-kick{font-family:'Montserrat',sans-serif; font-weight:300; font-size:9.5px; letter-spacing:.6em; text-transform:uppercase;
+            color:var(--ch-gold); margin-bottom:20px; opacity:0; transition:opacity 1.4s ease .5s;}
+        .sc-chiasm.in-view .ch-kick{opacity:1;}
+        .ch-title{font-family:'EB Garamond',serif; font-style:normal; font-weight:400; font-size:clamp(40px,7vw,118px); line-height:.92;
+            color:var(--ch-paper); letter-spacing:-.012em; margin:0; text-shadow:0 10px 80px rgba(0,0,0,.92);
+            opacity:0; transform:translateY(34px); filter:blur(16px);
+            transition:opacity 1.8s ease .6s, transform 1.8s cubic-bezier(.16,1,.3,1) .6s, filter 1.8s ease .6s;}
+        .ch-title .ch-sub-t{display:block; font-style:italic; font-weight:500; font-size:.58em; color:rgba(233,224,204,.9); margin-top:.06em;}
+        .sc-chiasm.in-view .ch-title{opacity:1; transform:translateY(0); filter:blur(0);}
+        .ch-q{margin:26px auto 0; max-width:640px; font-family:'EB Garamond',serif; font-style:italic; font-size:clamp(16px,1.7vw,23px);
+            line-height:1.62; color:rgba(243,236,220,.92); text-shadow:0 2px 26px rgba(0,0,0,.95), 0 0 50px rgba(0,0,0,.7);
+            opacity:0; transition:opacity 1.7s ease 1.4s;}
+        .sc-chiasm.in-view .ch-q{opacity:1;}
+
+        /* ===== Reversibility text — quiet marginalia =====
+           Editorial notes set in a small column, anchored to one side. They
+           defer to the imagery. Spectral roman (not the sugary italic display
+           serif) keeps the voice closer to a gallery label than a wedding
+           invitation. Pure-CSS fade; visible by default. */
+        .ch-note{position:relative; z-index:6; max-width:32em; margin:14vh 0;
+            padding:0 1.4em; border-left:1px solid rgba(216,186,120,.32);}
+        .ch-note.nl{margin-left:max(7vw, calc((100% - 1180px)/2 + 80px));}
+        .ch-note.nr{margin-left:auto; margin-right:max(7vw, calc((100% - 1180px)/2 + 80px));
+            border-left:none; border-right:1px solid rgba(216,186,120,.32);
+            padding:0 1.4em 0 1.4em; text-align:right;}
+        .ch-note.nc{margin:14vh auto; border-left:none; padding:0; text-align:center; max-width:38em;}
+        .ch-note.nc::before,.ch-note.nc::after{content:''; display:block; width:36px; height:1px;
+            background:rgba(216,186,120,.45); margin:18px auto;}
+        .ch-note p{font-family:'Spectral',serif; font-style:normal; font-weight:300;
+            font-size:clamp(14px,1.05vw,17px); line-height:1.78; letter-spacing:.012em;
+            color:rgba(228,221,205,.75); margin:0;
+            opacity:0; transform:translateY(10px); filter:blur(3px);
+            animation:noteIn 1.4s cubic-bezier(.16,1,.3,1) both;}
+        .ch-note em{color:rgba(216,186,120,.86); font-style:normal; font-weight:400;
+            letter-spacing:.02em;}
+        @keyframes noteIn{to{opacity:1; transform:translateY(0); filter:blur(0);}}
+
+        /* opener question under the title */
+        .ch-say-open{margin:36px auto 0; max-width:42em; font-size:clamp(14px,1.1vw,17px); line-height:1.75;
+            text-align:center; color:rgba(228,221,205,.7); letter-spacing:.04em;
+            font-family:'Spectral',serif; font-style:italic; font-weight:300;}
+        /* inline aside inside the image strip */
+        .ch-say-inline{flex:0 0 auto; align-self:center; max-width:20em; padding:0 2.5vw; text-align:center;
+            font-family:'Spectral',serif; font-weight:300; line-height:1.7;}
+        .ch-say-inline .ci-soft{display:block; font-size:clamp(13px,1vw,16px); color:rgba(190,198,206,.55);
+            letter-spacing:.02em; margin-bottom:.6em;}
+        .ch-say-inline .ci-key{display:block; font-size:clamp(16px,1.4vw,22px); color:rgba(228,221,205,.9);
+            letter-spacing:.012em; font-style:italic;}
+        .ch-say-inline::before,.ch-say-inline::after{content:''; display:block; width:30px; height:1px;
+            background:rgba(216,186,120,.5); margin:18px auto;}
+        /* finale line over the backlit frames */
+        .ch-say-fin{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:3; text-align:center;
+            font-family:'Spectral',serif; font-style:italic; font-weight:300; font-size:clamp(16px,1.4vw,22px);
+            color:rgba(228,221,205,.78); letter-spacing:.06em; text-transform:lowercase;
+            text-shadow:0 2px 30px rgba(8,9,5,.92); white-space:nowrap;}
+        @media (max-width:900px){
+            .ch-note,.ch-note.nl,.ch-note.nr,.ch-note.nc{margin:9vh 7vw; max-width:none;
+                text-align:left; padding:0 0 0 1.1em;
+                border-left:1px solid rgba(216,186,120,.32); border-right:none;}
+            .ch-note.nc{padding:0; border-left:none;}
+            .ch-note p{font-size:14px; line-height:1.74;}
+            .ch-say-open{font-size:15px; max-width:90vw;}
+            .ch-say-fin{position:static; transform:none; margin:8px auto; white-space:normal;}
+        }
+
+        /* THE GAZE — the interactive dark mirror. Two layers: a near-black
+           "dormant" wood, and the live silver reflection revealed by a soft
+           mask that follows the pointer. The silver looks back. */
+        .ch-gaze{position:relative; height:128vh; display:flex; align-items:center; justify-content:center; cursor:none; z-index:4;}
+        .ch-gaze .gz-frame{position:relative; width:min(70vw,720px); height:min(86vh,860px); overflow:hidden;
+            border-radius:48% 52% 46% 54%/40% 44% 56% 60%;
+            box-shadow:0 50px 120px -50px rgba(0,0,0,.9);}
+        .ch-gaze .gz-dark,.ch-gaze .gz-live{position:absolute; inset:0; background-size:cover; background-position:center;}
+        .ch-gaze .gz-dark{background-image:url('installation/chiasm/06.jpg'); filter:brightness(.26) saturate(.6) contrast(1.05);}
+        .ch-gaze .gz-live{background-image:url('installation/chiasm/06.jpg'); filter:brightness(1.04) saturate(1.05) contrast(1.08);
+            -webkit-mask-image:radial-gradient(circle var(--gr,0px) at var(--gx,50%) var(--gy,50%), #000 0%, transparent 76%);
+                    mask-image:radial-gradient(circle var(--gr,0px) at var(--gx,50%) var(--gy,50%), #000 0%, transparent 76%);}
+        .gz-frame2 .gz-dark{background-image:url('installation/chiasm/13.jpg'); filter:brightness(.24) saturate(.55) contrast(1.06);}
+        .gz-frame2 .gz-live{background-image:url('installation/chiasm/13.jpg');}
+        .ch-gaze .gz-ring{position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+            box-shadow:inset 0 0 120px 30px rgba(8,8,5,.8);}
+        .ch-gaze .gz-hint{position:absolute; left:50%; bottom:-7vh; transform:translateX(-50%); white-space:nowrap;
+            font-family:'Montserrat',sans-serif; font-weight:300; font-size:9px; letter-spacing:.42em; text-transform:uppercase;
+            color:rgba(233,224,204,.4); transition:opacity .8s ease;}
+        .ch-gaze.woken .gz-hint{opacity:0;}
+        /* the cursor becomes a soft silver lens inside the gaze */
+        .ch-cur{position:fixed; top:0; left:0; z-index:9100; pointer-events:none; opacity:0;
+            width:40px; height:40px; margin:-20px 0 0 -20px; border-radius:50%;
+            border:1px solid rgba(174,184,192,.6); box-shadow:0 0 30px 6px rgba(174,184,192,.18);
+            transition:opacity .5s ease, width .4s ease, height .4s ease;}
+        #ch.show-cur .ch-cur{opacity:1;}
+
+        /* LIGHTBOX — click any gallery image to see the full original */
+        .ins-lightbox{position:fixed; inset:0; z-index:9500; display:flex; align-items:center; justify-content:center;
+            background:rgba(6,6,4,.94); opacity:0; visibility:hidden; pointer-events:none;
+            transition:opacity .5s ease, visibility .5s ease; padding:5vh 5vw; cursor:zoom-out;}
+        .ins-lightbox.open{opacity:1; visibility:visible; pointer-events:auto;}
+        body.lb-open .ins-cur,body.lb-open .ch-cur{opacity:0 !important;}
+        .ins-lightbox img{max-width:92vw; max-height:88vh; width:auto; height:auto; object-fit:contain;
+            box-shadow:0 60px 140px -50px rgba(0,0,0,.95); transform:scale(.96); transition:transform .55s cubic-bezier(.16,1,.3,1);}
+        .ins-lightbox.open img{transform:scale(1);}
+        .ins-lightbox .lb-cap{position:absolute; left:0; right:0; bottom:3.4vh; text-align:center;
+            font-family:'Montserrat',sans-serif; font-weight:300; font-size:9px; letter-spacing:.36em; text-transform:uppercase;
+            color:rgba(233,224,204,.6); pointer-events:none;}
+        .ins-lightbox .lb-close{position:absolute; top:3vh; right:3.4vw; width:42px; height:42px; line-height:38px; text-align:center;
+            font-family:'EB Garamond',serif; font-size:30px; color:rgba(233,224,204,.7); cursor:pointer; border:1px solid rgba(233,224,204,.2);
+            border-radius:50%; transition:.35s;}
+        .ins-lightbox .lb-close:hover{color:#fff; border-color:rgba(233,224,204,.6); transform:rotate(90deg);}
+        /* anything zoomable gets a soft affordance */
+        .ch-strip .cf img,.ch-mosaic .mq img,.ch-trio .tf img,.ch-finale .cfin img,
+        .walk-rail figure img,.sc-kin .k-cell img{cursor:zoom-in;}
+        @media (max-width:900px){
+            .ins-lightbox{padding:3vh 3vw;} .ins-lightbox img{max-width:96vw; max-height:84vh;}
+            .ins-lightbox .lb-close{top:2vh; right:4vw;}
+        }
+
+        /* DRIFTING STRIP — the slices among the branches, horizontal walk */
+        .ch-strip{display:flex; gap:4vw; padding:9vh 8vw 7vh; overflow-x:auto; align-items:center; scrollbar-width:none; cursor:grab; z-index:4; position:relative;}
+        .ch-strip::-webkit-scrollbar{display:none;}
+        .ch-strip.drag{cursor:grabbing;}
+        .ch-strip .cf{flex:0 0 auto; margin:0; position:relative; opacity:0; transform:translateY(36px);
+            transition:opacity 1.2s ease, transform 1.2s cubic-bezier(.16,1,.3,1);}
+        .ch-strip.in-view .cf{opacity:1; transform:translateY(0);}
+        .ch-strip.in-view .cf:nth-of-type(2){transition-delay:.18s}
+        .ch-strip.in-view .cf:nth-of-type(3){transition-delay:.36s}
+        .ch-strip.in-view .cf:nth-of-type(4){transition-delay:.54s}
+        .ch-strip .cf img{display:block; height:54vh; width:auto; object-fit:cover;
+            filter:brightness(.8) saturate(.92) contrast(1.06); box-shadow:0 40px 80px -34px rgba(0,0,0,.85);
+            transition:transform .9s cubic-bezier(.16,1,.3,1), filter .9s ease;}
+        .ch-strip .cf.cf-tall img{height:64vh;}
+        .ch-strip .cf:hover img{transform:translateY(-10px); filter:brightness(.98) saturate(1.0);}
+        .ch-strip .cf figcaption{margin-top:14px; font-family:'Montserrat',sans-serif; font-weight:300; font-size:8.5px;
+            letter-spacing:.32em; text-transform:uppercase; color:rgba(233,224,204,.4);}
+        .ch-strip .cf-say{flex:0 0 auto; max-width:22ch; padding:0 2vw; text-align:center;
+            font-family:'EB Garamond',serif; font-style:italic; font-size:clamp(18px,1.7vw,26px); line-height:1.4; color:var(--ch-gold); opacity:.85;}
+        .ch-strip .cf-say::before,.ch-strip .cf-say::after{content:''; display:block; width:32px; height:1px; background:var(--ch-gold); opacity:.4; margin:16px auto;}
+
+        /* MOSAIC — swallowed skies. Asymmetric grid of mirror-pools. */
+        .ch-mosaic{display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:34vh; gap:10px; padding:12vh 6vw; z-index:4; position:relative;}
+        .ch-mosaic .mq{margin:0; position:relative; overflow:hidden; opacity:0; transform:scale(.96);
+            transition:opacity 1.4s ease, transform 1.6s cubic-bezier(.16,1,.3,1);}
+        .ch-mosaic.in-view .mq{opacity:1; transform:scale(1);}
+        .ch-mosaic.in-view .mq:nth-child(2){transition-delay:.15s}
+        .ch-mosaic.in-view .mq:nth-child(3){transition-delay:.3s}
+        .ch-mosaic.in-view .mq:nth-child(4){transition-delay:.45s}
+        .ch-mosaic .mq img{width:100%; height:100%; object-fit:cover; filter:brightness(.82) saturate(.95) contrast(1.06);
+            transition:transform 1.1s cubic-bezier(.16,1,.3,1), filter .9s ease;}
+        .ch-mosaic .mq:hover img{transform:scale(1.04); filter:brightness(.96);}
+        .ch-mosaic .mq-big{grid-column:span 2; grid-row:span 2;}
+        .ch-mosaic .mq-wide{grid-column:span 2;}
+        .ch-mosaic .mq figcaption{position:absolute; left:18px; bottom:16px; font-family:'Montserrat',sans-serif; font-weight:300;
+            font-size:8.5px; letter-spacing:.32em; text-transform:uppercase; color:rgba(233,224,204,.82); text-shadow:0 2px 12px rgba(0,0,0,.9);}
+
+        /* TRIO — the work set into / standing by the tree */
+        .ch-trio{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; padding:10vh 6vw; align-items:stretch; z-index:4; position:relative;}
+        .ch-trio .tf{margin:0; position:relative; overflow:hidden; opacity:0; transform:translateY(40px);
+            transition:opacity 1.6s ease, transform 1.6s cubic-bezier(.16,1,.3,1);}
+        .ch-trio.in-view .tf{opacity:1; transform:translateY(0);}
+        .ch-trio.in-view .tf:nth-child(2){transition-delay:.2s} .ch-trio.in-view .tf:nth-child(3){transition-delay:.4s}
+        .ch-trio .tf img{width:100%; height:72vh; object-fit:cover; filter:brightness(.78) saturate(.92) contrast(1.06);}
+        .ch-trio .tf.tf-tall img{height:82vh;}
+        .ch-trio .tf figcaption{position:absolute; left:18px; bottom:16px; font-family:'Montserrat',sans-serif; font-weight:300;
+            font-size:8.5px; letter-spacing:.32em; text-transform:uppercase; color:rgba(233,224,204,.82); text-shadow:0 2px 12px rgba(0,0,0,.9);}
+
+        /* FINALE — two backlit frames overlapping, the closing words between */
+        .ch-finale{position:relative; min-height:120vh; z-index:4;}
+        .ch-finale .cfin{position:absolute; overflow:hidden; box-shadow:0 50px 110px -50px rgba(0,0,0,.9);
+            opacity:0; transition:opacity 2s ease, transform 2s cubic-bezier(.16,1,.3,1);}
+        .ch-finale .cfin img{width:100%; height:100%; object-fit:cover; filter:brightness(.8) saturate(.95) contrast(1.06);}
+        .ch-finale .cfin-a{width:46vw; height:60vh; top:14vh; left:8vw; transform:translateY(40px);}
+        .ch-finale .cfin-b{width:42vw; height:64vh; bottom:12vh; right:8vw; transform:translateY(40px);}
+        .sc-chiasm.in-view .ch-finale .cfin{opacity:1; transform:translateY(0);}
+        .sc-chiasm.in-view .ch-finale .cfin-b{transition-delay:.4s;}
+        .ch-finale .ch-fin-txt{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:3;
+            font-family:'EB Garamond',serif; font-style:italic; font-size:clamp(22px,2.6vw,40px); color:var(--ch-paper);
+            text-shadow:0 4px 40px rgba(0,0,0,.95); white-space:nowrap; opacity:0; transition:opacity 2s ease 1s;}
+        .sc-chiasm.in-view .ch-finale .ch-fin-txt{opacity:1;}
+
+        @media (max-width:900px){
+            .sc-chiasm{min-height:auto;}
+            .ch-open{height:100vh;} .ch-open .ch-bg{background-position:center 40%;}
+            .ch-title{font-size:clamp(40px,15vw,80px);}
+            .ch-q{max-width:88vw; font-size:15px;}
+            .ch-line{padding:16vh 8vw;} .ch-line p{font-size:clamp(20px,5.4vw,30px);}
+            .ch-gaze{height:78vh; cursor:auto;}
+            .ch-gaze .gz-frame{width:88vw; height:60vh;}
+            .ch-cur{display:none;}
+            .ch-gaze .gz-live{-webkit-mask-image:radial-gradient(circle 150px at var(--gx,50%) var(--gy,50%), #000 0%, transparent 76%);
+                    mask-image:radial-gradient(circle 150px at var(--gx,50%) var(--gy,50%), #000 0%, transparent 76%);}
+            .ch-gaze .gz-hint{bottom:-5vh; font-size:8px;}
+            .ch-strip{padding:8vh 6vw; gap:8vw;} .ch-strip .cf img{height:44vh;} .ch-strip .cf.cf-tall img{height:50vh;}
+            .ch-mosaic{grid-template-columns:1fr 1fr; grid-auto-rows:30vh; padding:8vh 5vw;}
+            .ch-mosaic .mq-big{grid-column:span 2; grid-row:span 1; height:46vh;}
+            .ch-mosaic .mq-wide{grid-column:span 2;}
+            .ch-trio{grid-template-columns:1fr; padding:6vh 5vw;} .ch-trio .tf img,.ch-trio .tf.tf-tall img{height:54vh;}
+            .ch-finale{min-height:auto; padding:8vh 0; display:flex; flex-direction:column; gap:14px;}
+            .ch-finale .cfin{position:static; width:88vw; height:46vh; margin:0 auto; transform:translateY(30px);}
+            .ch-finale .ch-fin-txt{position:static; transform:translateY(20px); margin:6px auto; text-align:center;}
+        }
+
+        /* ---------- 08 · CLOSE (clearing, fade to dark) ---------- */
+        .sc-close{position:relative; min-height:120vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+            text-align:center; padding:24vh 10vw; z-index:4;}
+        .sc-close .c-main{font-family:'EB Garamond',serif; font-size:clamp(24px,3.4vw,54px); font-weight:400; font-style:italic;
+            line-height:1.46; color:rgba(239,230,210,.92); opacity:0; transform:translateY(26px); filter:blur(6px);
+            transition:opacity 1.9s ease, transform 1.9s ease, filter 1.9s ease;}
+        .sc-close.in-view .c-main{opacity:1; transform:translateY(0); filter:blur(0);}
+        .sc-close .c-sign{margin-top:6vh; font-family:'Montserrat',sans-serif; font-weight:300; font-size:11px; letter-spacing:.42em;
+            color:var(--paper-faint); text-transform:uppercase; opacity:0; transition:opacity 1.7s ease .8s;}
+        .sc-close.in-view .c-sign{opacity:1;}
+
+        /* ---------- MOBILE ---------- */
+        @media (max-width:900px){
+            body.ins-cursor-hide{cursor:auto;}
+            #level-ins .ins-cur,#level-ins .ins-torch{display:none;}
+            .ins-back{top:20px;left:22px} .ins-folio{bottom:18px;right:22px}
+            /* MOBILE CANOPY — full portrait photo, same growth reveal */
+            .sc-canopy{min-height:auto; padding:0;}
+            .seam-stage{height:193vw;}
+            .sc-canopy .seam-stage .bg{background-position:center top; background-size:100% auto;}
+            .seam-skylight{width:90vw;}
+            .seam-motes{display:none;}
+            .seam-glow{display:none;}
+            .sc-canopy .scene-shade{background:
+                radial-gradient(130% 40% at 50% 22%, transparent 66%, rgba(11,10,6,.2) 100%),
+                linear-gradient(180deg,
+                    rgba(11,10,6,.3) 0%, transparent 12%,
+                    transparent 84%,
+                    rgba(11,10,6,.45) 94%,
+                    rgba(11,10,6,.75) 100%);}
+            .canopy-txt{left:0; right:0; max-width:none; padding:0 8vw; top:62vh; bottom:auto; transform:none; text-align:center;}
+            .canopy-kick{font-size:8.5px; letter-spacing:.42em; margin-bottom:16px;}
+            .canopy-kick::before,.canopy-kick::after{width:22px;}
+            .canopy-title{font-size:clamp(36px,11vw,64px); line-height:.98; letter-spacing:-.01em;}
+            .canopy-title .l2{padding-left:0;}
+            .canopy-sub{max-width:90vw; font-size:15px; line-height:1.6; margin-top:18px;}
+            .canopy-cue{top:calc(100vh - 74px); bottom:auto; font-size:8px; letter-spacing:.36em;}
+            .scene{min-height:78vh;}
+            .ins-line{padding:18vh 8vw;}
+            .ins-line p{font-size:clamp(20px,5.4vw,30px);}
+            .walk-rail figure img{height:46vh;} .walk-rail figure.near img{height:52vh;}
+            .walk-rail{gap:6vw; padding:0 8vw;}
+            .sc-walk .walk-head{flex-direction:column; align-items:flex-start; gap:12px; padding:0 8vw 5vh;}
+            .reveal{max-width:92vw; cursor:auto;}
+            .reveal img{max-width:92vw; max-height:64vh;}
+            .reveal .cover{-webkit-mask-image:radial-gradient(circle 130px at 50% 52%,transparent 0%,#000 78%); mask-image:radial-gradient(circle 130px at 50% 52%,transparent 0%,#000 78%);}
+            .sc-kin{grid-template-columns:1fr; gap:3px; min-height:auto; padding:10vh 5vw;} .sc-kin .k-cell img{height:52vh;}
+            .sc-kin .k-mid{position:static; transform:none; margin:10px auto; display:inline-block;}
+            .sc-close{min-height:auto; padding:16vh 8vw;}
+        }
+
     </style>
+    <script src="libs/three/three.min.js"></script>
+    <script src="libs/three/OrbitControls.js"></script>
+    <script src="libs/three/GLTFLoader.js"></script>
+    <script src="models/scu_01_sporeling.glb.js"></script>
+    <script src="models/scu_02_heliconia.glb.js"></script>
+    <script src="models/scu_03_monstera.glb.js"></script>
+    <script src="models/scu_04_titan.glb.js"></script>
+    <script src="models/scu_05_dionaea.glb.js"></script>
 </head>
 <body>
     <!-- shared SVG filter: directional warm drop-shadow on alpha — no bounding-box bleed in Safari -->
@@ -12994,8 +13779,9 @@
             <div class="scattered-nav" id="nav">
                 <a href="#" class="nav-item" id="illustration-link"><span class="nav-en">Tracing the silent shadows</span><span class="nav-sub">Illustration</span></a>
                 <a href="#" class="nav-item" id="publication-link"><span class="nav-en">Folding time into paper</span><span class="nav-sub">Publishing</span></a>
-                <a href="#" class="nav-item" id="sculpture-link"><span class="nav-en">Breathing life into the void</span><span class="nav-sub">3D Art</span></a>
+                <a href="#" class="nav-item" id="installation-link"><span class="nav-en">Inhabiting the space between</span><span class="nav-sub">Installation & Space</span></a>
                 <a href="#" class="nav-item" id="audio-link"><span class="nav-en">Catching frequencies of the soul</span><span class="nav-sub">Audio</span></a>
+                <a href="#" class="nav-item" id="sculpture-link"><span class="nav-en">Casting tiny worlds into being</span><span class="nav-sub">Collectible Design</span></a>
             </div>
             <div class="whisper-quote" id="quote">"Art is the map of my returning..."</div>
         </div>
@@ -13117,7 +13903,6 @@
         <!-- ========== SCULPTURE (Chapter 03) — 3D Art ===================== -->
         <!-- ================================================================ -->
         <div id="level-scu">
-            <div class="scu-entry-sweep"></div>
             <div class="scu-content">
                 <div class="scu-back" onclick="resetToHomeFromScu()">← return</div>
                 <div class="scu-chap">Chapter 03 / 3D Art</div>
@@ -13129,18 +13914,17 @@
                         </div>
                         <div class="body">
                             <p>This is a small, ongoing series of figurines — each one a tropical plant arrested in the moment of becoming a child, or perhaps a child arrested in the moment of becoming a plant. I do not always know which way the breath travels.</p>
-                            <p>They are designed, modelled, and printed in resin, then hand-finished. Released as a blind-box series: the collector receives one of the five at random, the way a forest gives you what it decides to give. Each comes nested in a paper husk with a folded card of its plant's lore.</p>
+                            <p>They are designed, modelled, and printed in resin, then hand-finished. Here they stand together in a quiet vitrine — turn each one in your hands, the way you would in the light of a window.</p>
                             <p>The figures live where my flat drawings cannot reach — under a lamp, on a windowsill, in a stranger's palm. I think of them as the part of my forest that escaped the page and refused to come back.</p>
                         </div>
-                        <div class="marker-bottom">III · 3D Art · Blind-box Series</div>
+                        <div class="marker-bottom">III · 3D Art · The Vitrine</div>
                     </aside>
                     <main class="scu-cabinet-wrap" id="scu-cabinet-wrap">
-                        <div class="scu-cabinet" id="scu-cabinet">
-                            <div class="scu-mist m1"></div>
-                            <div class="scu-mist m2"></div>
-                            <div class="scu-mist m3"></div>
-                            <div class="scu-mist m4"></div>
-                            <!-- cards injected by JS -->
+                        <div class="scu-vitrine" id="scu-vitrine">
+                            <canvas id="scu-shelf-canvas"></canvas>
+                            <div class="scu-shelf-loading" id="scu-shelf-loading"><span></span></div>
+                            <div class="scu-shelf-name" id="scu-shelf-name"></div>
+                            <div class="scu-shelf-hint" id="scu-shelf-hint">drag to turn the vitrine · click a figure to enter</div>
                         </div>
                     </main>
                 </div>
@@ -13155,7 +13939,12 @@
             <div class="scu-detail-stage" id="scu-detail-stage">
                 <div class="scu-detail-grid">
                     <div class="scu-detail-figure">
-                        <img id="scu-detail-img" src="" alt="">
+                        <div class="scu-3d-stage" id="scu-3d-stage">
+                            <canvas id="scu-3d-canvas"></canvas>
+                            <div class="scu-3d-loading" id="scu-3d-loading"><span></span></div>
+                            <div class="scu-3d-hint" id="scu-3d-hint">drag to turn · scroll to zoom</div>
+                            <img id="scu-detail-img" src="" alt="" style="display:none">
+                        </div>
                         <div class="scu-detail-figure-caption" id="scu-detail-cap">Resin, hand-painted · approx. 12 cm</div>
                     </div>
                     <div class="scu-detail-text">
@@ -13165,6 +13954,20 @@
                         <div class="scu-detail-poem" id="scu-detail-poem">—</div>
                         <div class="scu-detail-body" id="scu-detail-body"></div>
                         <div class="scu-detail-spec" id="scu-detail-spec"></div>
+                    </div>
+                </div>
+
+                <!-- FULL 3D VIEWER — turn the specimen freely, top to bottom -->
+                <div class="scu-360">
+                    <div class="scu-360-head">
+                        <div class="scu-360-eyebrow">Hold it in the light</div>
+                        <div class="scu-360-title">The figure, in full</div>
+                        <div class="scu-360-sub">Drag to turn it any way — over the top, beneath the feet. Scroll to come closer.</div>
+                    </div>
+                    <div class="scu-360-stage" id="scu-360-stage">
+                        <canvas id="scu-360-canvas"></canvas>
+                        <div class="scu-360-loading" id="scu-360-loading"><span></span></div>
+                        <div class="scu-360-hint" id="scu-360-hint">drag · scroll to zoom</div>
                     </div>
                 </div>
             </div>
@@ -18622,6 +19425,7 @@
                     id: 'sporeling',
                     no: 'I',
                     src: 'images/sculpture/scu_01_sporeling.jpg',
+                    model: 'models/scu_01_sporeling.glb',
                     name: 'The Sporeling',
                     latin: 'Platycerium · staghorn fern',
                     habitat: 'Beneath the basket fronds',
@@ -18630,10 +19434,10 @@
                     left: 12, top: 6, width: 38, rotate: -2.0, breath: '9.2s',
                     // Detail page poem + body
                     tint: 'rgba(110,140,90,0.34)',
-                    poem: 'She sleeps wrapped in the antlers of a fern. <span class="lift">It is the kind of sleep a forest gives only to its own.</span>',
+                    poem: 'It sleeps wrapped in the antlers of a fern. <span class="lift">It is the kind of sleep a forest gives only to its own.</span>',
                     body: [
-                        'The staghorn fern grows in two halves — a shield clinging to bark, and a basket cupping the sky. She is what gathers in the basket when no one is watching.',
-                        'Her arms are folded around herself the way a frond curls before it opens. Her ears are not ears. Her sleep is not quite sleep. She has been there for a long time, and she will be there longer.'
+                        'The staghorn fern grows in two halves — a shield clinging to bark, and a basket cupping the sky. It is what gathers in the basket when no one is watching.',
+                        'Its arms are folded around itself the way a frond curls before it opens. Its ears are not ears. Its sleep is not quite sleep. It has been there for a long time, and it will be there longer.'
                     ],
                     spec: [
                         ['Form', 'Resin, hand-painted'],
@@ -18646,16 +19450,17 @@
                     id: 'heliconia',
                     no: 'II',
                     src: 'images/sculpture/scu_02_heliconia.jpg',
+                    model: 'models/scu_02_heliconia.glb',
                     name: 'The Heliconia Hour',
                     latin: 'Strelitzia reginae · bird-of-paradise',
                     habitat: 'At the edge of first light',
                     edition: 'No. II of V',
                     left: 56, top: 18, width: 34, rotate: 3.0, breath: '10.4s',
                     tint: 'rgba(220,130,75,0.36)',
-                    poem: 'She wears the morning as a crown. <span class="lift">It will not last; she does not mind.</span>',
+                    poem: 'It wears the morning as a crown. <span class="lift">It will not last; it does not mind.</span>',
                     body: [
-                        'The bird-of-paradise opens like a beak about to speak. She is what the beak holds back — an hour of orange and indigo that the day has not yet learned to name.',
-                        'I sculpted her standing because she will not stay. Heliconias bloom in shifts; what you see at noon is not what was there at dawn. She is the dawn part, caught.'
+                        'The bird-of-paradise opens like a beak about to speak. It is what the beak holds back — an hour of orange and indigo that the day has not yet learned to name.',
+                        'I sculpted it standing because it will not stay. Heliconias bloom in shifts; what you see at noon is not what was there at dawn. It is the dawn part, caught.'
                     ],
                     spec: [
                         ['Form', 'Resin, hand-painted'],
@@ -18668,16 +19473,17 @@
                     id: 'monstera',
                     no: 'III',
                     src: 'images/sculpture/scu_03_monstera.jpg',
+                    model: 'models/scu_03_monstera.glb',
                     name: 'Monstera, Veiled',
                     latin: 'Monstera deliciosa · split-leaf philodendron',
                     habitat: 'After the rain, before it dries',
                     edition: 'No. III of V',
                     left: 6, top: 78, width: 42, rotate: 1.2, breath: '11.0s',
                     tint: 'rgba(110,135,115,0.30)',
-                    poem: 'She hides in her own leaves, holding a smaller leaf <span class="lift">the way one holds a secret one is not yet ready to lose.</span>',
+                    poem: 'It hides in its own leaves, holding a smaller leaf <span class="lift">the way one holds a secret one is not yet ready to lose.</span>',
                     body: [
-                        'Monstera leaves split as they age — slow tears that let the wind through. She is the shy version of that, still whole, hooding herself in green where the rain still beads.',
-                        'In her hands is a fern, not a monstera leaf. The forest is a place where one plant carries another and no one explains why.'
+                        'Monstera leaves split as they age — slow tears that let the wind through. It is the shy version of that, still whole, hooding itself in green where the rain still beads.',
+                        'In its hands is a fern, not a monstera leaf. The forest is a place where one plant carries another and no one explains why.'
                     ],
                     spec: [
                         ['Form', 'Resin, hand-painted'],
@@ -18690,16 +19496,17 @@
                     id: 'titan',
                     no: 'IV',
                     src: 'images/sculpture/scu_04_titan.jpg',
+                    model: 'models/scu_04_titan.glb',
                     name: 'The Bloom That Took Years',
                     latin: 'Amorphophallus titanum · titan arum',
                     habitat: 'A clearing, once a decade',
                     edition: 'No. IV of V',
                     left: 48, top: 92, width: 40, rotate: -2.8, breath: '12.0s',
                     tint: 'rgba(180,105,130,0.36)',
-                    poem: 'She blooms once in a long time. <span class="lift">She holds her face because the world is too much, too soon, all at once.</span>',
+                    poem: 'It blooms once in a long time. <span class="lift">It holds its face because the world is too much, too soon, all at once.</span>',
                     body: [
-                        'The corpse flower waits seven, ten, sometimes more years underground, then opens for a single day. She is what opens — and what closes again, knowing the cost.',
-                        'I made her cover her face. Not from shame. From the weight of finally being seen. The maroon spathe behind her is the year she spent rehearsing.'
+                        'The corpse flower waits seven, ten, sometimes more years underground, then opens for a single day. It is what opens — and what closes again, knowing the cost.',
+                        'I made it cover its face. Not from shame. From the weight of finally being seen. The maroon spathe behind it is the year it spent rehearsing.'
                     ],
                     spec: [
                         ['Form', 'Resin, hand-painted'],
@@ -18712,16 +19519,17 @@
                     id: 'dionaea',
                     no: 'V',
                     src: 'images/sculpture/scu_05_dionaea.jpg',
+                    model: 'models/scu_05_dionaea.glb',
                     name: 'The Sweet-Toothed One',
                     latin: 'Dionaea muscipula · Venus flytrap',
-                    habitat: 'Where the soil forgets to feed her',
+                    habitat: 'Where the soil forgets to feed it',
                     edition: 'No. V of V',
                     left: 22, top: 162, width: 40, rotate: 2.4, breath: '9.6s',
                     tint: 'rgba(170,180,90,0.34)',
-                    poem: 'She smiles three times — <span class="lift">with her hair, with her hands, with the small mouth no one ever sees.</span>',
+                    poem: 'It smiles three times — <span class="lift">with its hair, with its hands, with the small mouth no one ever sees.</span>',
                     body: [
-                        'The Venus flytrap lives in poor soil, so it learned a second way to eat. She is the same arrangement, in another scale: an instinct dressed up as a child.',
-                        'The traps on her head and her wrists are real to her, but they are gentle. They close around moths and apologies. She does not mind which.'
+                        'The Venus flytrap lives in poor soil, so it learned a second way to eat. It is the same arrangement, in another scale: an instinct dressed up as a child.',
+                        'The traps on its head and its wrists are real to it, but they are gentle. They close around moths and apologies. It does not mind which.'
                     ],
                     spec: [
                         ['Form', 'Resin, hand-painted'],
@@ -18731,6 +19539,7 @@
                     ]
                 }
             ];
+            window.SCU_SPECIMENS = SCU_SPECIMENS;
 
             const scuLink = document.getElementById('sculpture-link');
             let scuBuilt = false;
@@ -18775,7 +19584,9 @@
             // the layout scales gracefully across viewport sizes.
             // -----------------------------------------------------------
             function buildSculptureCabinet() {
+                if (window.mountScuShelf) { window.mountScuShelf(); return; }
                 const cabinet = document.getElementById('scu-cabinet');
+                if (!cabinet) return;
                 const wrap = document.getElementById('scu-cabinet-wrap');
                 const isMobile = window.innerWidth <= 900;
 
@@ -18947,8 +19758,20 @@
                     document.getElementById('level-scu').style.display = 'none';
                     dl.style.display = 'block';
                     // Populate
-                    document.getElementById('scu-detail-img').src = s.src;
-                    document.getElementById('scu-detail-img').alt = s.name;
+                    // Detail page shows the original flat specimen card image,
+                    // exactly as in the original deployed version. The 3D vitrine
+                    // remains the gallery view outside.
+                    (function showCardImage(){
+                        const cv3d   = document.getElementById('scu-3d-canvas');
+                        const load3d = document.getElementById('scu-3d-loading');
+                        const hint3d = document.getElementById('scu-3d-hint');
+                        const stage3d= document.getElementById('scu-3d-stage');
+                        const img    = document.getElementById('scu-detail-img');
+                        if (cv3d)   cv3d.style.display   = 'none';
+                        if (load3d) load3d.style.display = 'none';
+                        if (hint3d) hint3d.style.display = 'none';
+                        if (img){ img.src = s.src; img.style.display = 'block'; img.alt = s.name; }
+                    })();
                     document.getElementById('scu-detail-no').textContent = 'Specimen No. ' + s.no + ' · 3D Art · Blind-box Series';
                     document.getElementById('scu-detail-name').textContent = s.name;
                     document.getElementById('scu-detail-latin').textContent = s.latin;
@@ -18962,6 +19785,9 @@
                     document.getElementById('scu-detail-bg').style.setProperty('--detail-tint', s.tint);
                     document.getElementById('scu-detail-chap').textContent = 'Chapter 03 / 3D Art · ' + s.no;
 
+                    // lower section: full free-orbit 3D viewer of this specimen
+                    if (window.mountScu360) window.mountScu360(s);
+
                     window.scrollTo(0, 0);
                     dl.scrollTop = 0;
 
@@ -18973,6 +19799,8 @@
             };
 
             window.returnToSculptureCabinet = function() {
+                if (window.unmountScuViewer) window.unmountScuViewer();
+                if (window.unmountScu360) window.unmountScu360();
                 const overlay = document.getElementById('white-overlay');
                 const dl = document.getElementById('level-scu-detail');
                 overlay.style.opacity = '1';
@@ -19406,7 +20234,289 @@
                 }, 1100);
             };
 
+            
+            
+            
+            
+            
+            // ============================================================
+            // ===== INSTALLATION v6 — editorial + environmental ==========
+            // ============================================================
+            const insLink = document.getElementById('installation-link');
 
+            if (insLink) {
+                insLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (!navAwakened) return;
+                    insLink.querySelectorAll('.letter').forEach(l => {
+                        l.style.setProperty('--out-x',(Math.random()-0.5)*400+'px');
+                        l.style.setProperty('--out-y',(Math.random()*300+150)+'px');
+                        l.style.setProperty('--out-r',(Math.random()-0.5)*360+'deg');
+                        l.classList.add('scatter-out');
+                    });
+                    brand.style.opacity='0'; quote.style.opacity='0';
+                    footerLinks.style.opacity='0'; syncAudioToggle('0');
+                    navItems.forEach((oi,odx)=>{ if(odx!==2) oi.style.opacity='0'; });
+                    setTimeout(()=>{ document.getElementById('white-overlay').style.opacity='1'; },300);
+                    setTimeout(()=>{
+                        document.getElementById('scene-container').style.display='none';
+                        document.getElementById('ui-layer').style.display='none';
+                        const li=document.getElementById('level-ins'); li.style.display='block'; li.scrollTop=0;
+                        const f0=li.querySelector('#ins-forest'); if(f0) f0.scrollTop=0;
+                        setTimeout(()=>{
+                            document.getElementById('white-overlay').style.opacity='0';
+                            li.classList.add('active'); initInsV6();
+                        },50);
+                    },900);
+                });
+            }
+
+            function initInsV6() {
+                const li=document.getElementById('level-ins');
+                const forest=li.querySelector('#ins-forest');
+                const isTouch=window.matchMedia('(max-width:900px)').matches||('ontouchstart' in window);
+                const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+                // reveal-on-scroll
+                const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in-view'); }),{threshold:0.04, rootMargin:'0px 0px -8% 0px', root:forest});
+                li.querySelectorAll('.ins-line,.sc-walk,.sc-grass,.sc-metal,.sc-kin,.sc-close,.sc-approach,.sc-elder,.sc-chiasm,.ch-strip,.ch-mosaic,.ch-trio,.works-seam').forEach(el=>io.observe(el));
+
+                // spores
+                if(!reduce){
+                    const sw=li.querySelector('#ins-spores');
+                    if(sw && !sw.dataset.filled){
+                        sw.dataset.filled='1';
+                        for(let i=0;i<30;i++){
+                            const m=document.createElement('div'); m.className='spore';
+                            const s=Math.random()*2.6+0.8; m.style.width=m.style.height=s+'px';
+                            m.style.left=(Math.random()*100)+'%'; m.style.top=(Math.random()*100)+'%';
+                            m.style.animationDuration=(Math.random()*10+8)+'s';
+                            m.style.animationDelay=(-Math.random()*14)+'s';
+                            sw.appendChild(m);
+                        }
+                    }
+                }
+
+                // scroll: depth (darken sky), parallax scene images, depth gauge
+                // rAF-throttled, reads batched before writes — no per-frame reflow.
+                const depthFill=li.querySelector('#ins-depth-fill');
+                const sceneImgs=[...li.querySelectorAll('.scene-img')];
+                const canopyStage=li.querySelector('.sc-canopy .seam-stage');
+                const growCurtain=li.querySelector('.seam-grow');
+                let cgTarget=0, cgCur=0, cgRaf=null;
+                // damped growth: the curtain eases toward the scroll target, slower
+                // than the scroll itself — the tree keeps growing in after you stop.
+                const growLoop=()=>{
+                    cgCur+=(cgTarget-cgCur)*0.06;
+                    const vh=forest.clientHeight||window.innerHeight;
+                    if(growCurtain){
+                        // start covering from ~46vh below top, slide down ~1.45× stage as cg→1
+                        const y=vh*0.46 + cgCur*(canopyStage?canopyStage.offsetHeight:vh)*0.62;
+                        growCurtain.style.transform=`translate3d(0,${y.toFixed(1)}px,0)`;
+                    }
+                    li.style.setProperty('--cg', cgCur.toFixed(4));
+                    if(Math.abs(cgTarget-cgCur)>0.0008) cgRaf=requestAnimationFrame(growLoop); else cgRaf=null;
+                };
+                let scrollRaf=null;
+                // cache each scene-img parent's offsetTop/height once (recomputed on
+                // resize) so the per-frame parallax never forces a synchronous layout.
+                let imgGeo=[];
+                const measureImgGeo=()=>{ imgGeo=sceneImgs.map(img=>{ const p=img.parentElement;
+                    return {top:p.offsetTop, h:p.offsetHeight}; }); };
+                measureImgGeo();
+                const applyScroll=()=>{
+                    scrollRaf=null;
+                    const max=forest.scrollHeight-forest.clientHeight;
+                    const st=forest.scrollTop;
+                    const p=max>0?st/max:0;
+                    li.style.setProperty('--depth', Math.max(0,Math.min(1,p)).toFixed(3));
+                    if(depthFill) depthFill.style.height=(p*100).toFixed(1)+'%';
+                    // canopy growth target (actual value is damped in growLoop)
+                    if(canopyStage){
+                        const ch=canopyStage.offsetHeight - forest.clientHeight;
+                        cgTarget=ch>0?Math.max(0,Math.min(1,st/ch)):0;
+                        if(!cgRaf) cgRaf=requestAnimationFrame(growLoop);
+                    }
+                    if(!isTouch){
+                        const vh=forest.clientHeight;
+                        // pure math from cached geometry — zero layout reads per frame
+                        sceneImgs.forEach((img,i)=>{
+                            const g=imgGeo[i]; if(!g) return;
+                            const center=g.top + g.h/2 - st;     // element center vs viewport top
+                            const rel=(center - vh/2)/vh;
+                            img.style.transform=`scale(1.1) translateY(${(rel*-50).toFixed(1)}px)`;
+                        });
+                    }
+                };
+                const onScroll=()=>{ if(!scrollRaf) scrollRaf=requestAnimationFrame(applyScroll); };
+                forest.addEventListener('scroll',onScroll,{passive:true});
+                addEventListener('resize',()=>{ measureImgGeo(); applyScroll(); });
+                // re-measure after images load (their height affects offsets)
+                li.querySelectorAll('.scene-img').forEach(()=>{});
+                setTimeout(()=>{ measureImgGeo(); applyScroll(); }, 400);
+                setTimeout(()=>{ measureImgGeo(); applyScroll(); }, 1600);
+                applyScroll();
+
+                // canopy motes — drifting light specks, spawned once
+                const moteWrap=li.querySelector('#seam-motes');
+                if(moteWrap && !moteWrap.dataset.filled && !reduce){
+                    moteWrap.dataset.filled='1';
+                    for(let i=0;i<22;i++){
+                        const m=document.createElement('i');
+                        const s=Math.random()*2.4+1.4; m.style.width=m.style.height=s+'px';
+                        m.style.left=(Math.random()*100)+'%'; m.style.top=(Math.random()*100)+'%';
+                        m.style.animationDuration=(Math.random()*9+7)+'s';
+                        m.style.animationDelay=(-Math.random()*12)+'s';
+                        moteWrap.appendChild(m);
+                    }
+                }
+
+                // spotlight reveal
+                li.querySelectorAll('.reveal').forEach(rev=>{
+                    const cover=rev.querySelector('.cover');
+                    let curR=0,tgtR=0,mx=50,my=52,raf=null;
+                    const tick=()=>{ curR+=(tgtR-curR)*0.18; cover.style.setProperty('--r',curR.toFixed(1)+'px');
+                        cover.style.setProperty('--mx',mx+'px'); cover.style.setProperty('--my',my+'px');
+                        if(Math.abs(tgtR-curR)>0.5) raf=requestAnimationFrame(tick); else raf=null; };
+                    if(!isTouch){
+                        rev.addEventListener('mouseenter',()=>{ rev.classList.add('touched'); tgtR=220; if(!raf)raf=requestAnimationFrame(tick); });
+                        rev.addEventListener('mouseleave',()=>{ tgtR=0; if(!raf)raf=requestAnimationFrame(tick); });
+                        rev.addEventListener('mousemove',(ev)=>{ const r=rev.getBoundingClientRect(); mx=ev.clientX-r.left; my=ev.clientY-r.top; if(!raf)raf=requestAnimationFrame(tick); });
+                    } else {
+                        rev.classList.add('touched');
+                        const sf=(t)=>{ const r=rev.getBoundingClientRect(); mx=t.clientX-r.left; my=t.clientY-r.top; tgtR=170; if(!raf)raf=requestAnimationFrame(tick); };
+                        rev.addEventListener('touchstart',e=>sf(e.touches[0]),{passive:true});
+                        rev.addEventListener('touchmove',e=>sf(e.touches[0]),{passive:true});
+                    }
+                });
+
+                // CHIASM — the gaze. The silver wakes where the pointer passes.
+                li.querySelectorAll('.ch-gaze').forEach(gaze=>{
+                    if(gaze.dataset.bound) return; gaze.dataset.bound='1';
+                    const live=gaze.querySelector('.gz-live');
+                    const chWrap=li.querySelector('#ch');
+                    const chCur=li.querySelector('#ch-cur');
+                    const frame=gaze.querySelector('.gz-frame');
+                    let gr=0,tr=0,gx=50,gy=50,graf=null;
+                    const gtick=()=>{ gr+=(tr-gr)*0.12;
+                        live.style.setProperty('--gr',gr.toFixed(1)+'px');
+                        live.style.setProperty('--gx',gx+'%'); live.style.setProperty('--gy',gy+'%');
+                        if(Math.abs(tr-gr)>0.4) graf=requestAnimationFrame(gtick); else graf=null; };
+                    const setFromXY=(cx,cy)=>{ const r=frame.getBoundingClientRect();
+                        gx=Math.max(0,Math.min(100,((cx-r.left)/r.width)*100));
+                        gy=Math.max(0,Math.min(100,((cy-r.top)/r.height)*100)); };
+                    if(!isTouch){
+                        gaze.addEventListener('mouseenter',()=>{ gaze.classList.add('woken'); chWrap.classList.add('show-cur'); tr=Math.min(frame.getBoundingClientRect().width*0.34,260); if(!graf)graf=requestAnimationFrame(gtick); });
+                        gaze.addEventListener('mouseleave',()=>{ tr=0; chWrap.classList.remove('show-cur'); if(!graf)graf=requestAnimationFrame(gtick); });
+                        gaze.addEventListener('mousemove',e=>{ setFromXY(e.clientX,e.clientY); if(chCur) chCur.style.transform=`translate(${e.clientX}px,${e.clientY}px)`; if(!graf)graf=requestAnimationFrame(gtick); });
+                    } else {
+                        gaze.classList.add('woken');
+                        const tf=t=>{ setFromXY(t.clientX,t.clientY); tr=200; if(!graf)graf=requestAnimationFrame(gtick); };
+                        gaze.addEventListener('touchstart',e=>tf(e.touches[0]),{passive:true});
+                        gaze.addEventListener('touchmove',e=>tf(e.touches[0]),{passive:true});
+                    }
+                });
+
+
+                const cstrip=li.querySelector('#ch-strip');
+                if(cstrip && !cstrip.dataset.bound){
+                    cstrip.dataset.bound='1';
+                    let cdn=false,csx,css;
+                    cstrip.addEventListener('mousedown',e=>{ cdn=true; cstrip.dataset.dragmoved='0'; cstrip.classList.add('drag'); csx=e.pageX; css=cstrip.scrollLeft; });
+                    window.addEventListener('mouseup',()=>{ cdn=false; cstrip.classList.remove('drag'); });
+                    cstrip.addEventListener('mousemove',e=>{ if(!cdn) return; if(Math.abs(e.pageX-csx)>4) cstrip.dataset.dragmoved='1'; e.preventDefault(); cstrip.scrollLeft=css-(e.pageX-csx)*1.4; });
+                }
+
+                // LIGHTBOX — click any gallery image to view the full original
+                if(!li.dataset.lbBound){
+                    li.dataset.lbBound='1';
+                    const lb=li.querySelector('#ins-lightbox');
+                    const lbImg=li.querySelector('#ins-lb-img');
+                    const lbCap=li.querySelector('#ins-lb-cap');
+                    const openLb=(src,cap)=>{ lbImg.src=src; lbCap.textContent=cap||''; lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); document.body.classList.add('lb-open'); };
+                    const closeLb=()=>{ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); document.body.classList.remove('lb-open'); setTimeout(()=>{ if(!lb.classList.contains('open')) lbImg.src=''; },520); };
+                    li.querySelector('#ins-lb-close').addEventListener('click',e=>{ e.stopPropagation(); closeLb(); });
+                    lb.addEventListener('click',closeLb);
+                    document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeLb(); });
+                    const zoomSel='.ch-strip .cf img,.ch-mosaic .mq img,.ch-trio .tf img,.ch-finale .cfin img,.walk-rail figure img,.sc-kin .k-cell img';
+                    li.querySelectorAll(zoomSel).forEach(im=>{
+                        im.addEventListener('click',ev=>{
+                            const strip=im.closest('#ch-strip');
+                            if(strip && strip.dataset.dragmoved==='1'){ strip.dataset.dragmoved='0'; return; }
+                            const cap=im.parentElement.querySelector('figcaption,.k-label,figcaption');
+                            openLb(im.getAttribute('src'), cap?cap.textContent:'');
+                        });
+                    });
+                    // the two gaze mirrors open their full original too
+                    li.querySelectorAll('.ch-gaze').forEach(g=>{
+                        const live=g.querySelector('.gz-live');
+                        const m=(getComputedStyle(live).backgroundImage||'').match(/chiasm\/(\d+)\.jpg/);
+                        if(m) g.querySelector('.gz-frame').addEventListener('dblclick',()=>openLb('installation/chiasm/'+m[1]+'.jpg','the gaze'));
+                    });
+                }
+
+                // walk-rail drag + wheel→horizontal
+                const rail=li.querySelector('#ins-walk');
+                if(rail && !rail.dataset.bound){
+                    rail.dataset.bound='1';
+                    let down=false,sx,ss;
+                    rail.addEventListener('mousedown',e=>{ down=true; rail.classList.add('drag'); sx=e.pageX; ss=rail.scrollLeft; });
+                    window.addEventListener('mouseup',()=>{ down=false; rail.classList.remove('drag'); });
+                    rail.addEventListener('mousemove',e=>{ if(!down) return; e.preventDefault(); rail.scrollLeft=ss-(e.pageX-sx)*1.4; });
+                }
+
+                if(isTouch) return;
+
+                // torch + light-ring cursor
+                document.body.classList.add('ins-cursor-hide');
+                const cur=li.querySelector('#ins-cur');
+                const torch=li.querySelector('#ins-torch');
+                const seamGlow=li.querySelector('#seam-glow');
+                let glowBase=null;
+                if(seamGlow){ // capture its static layout origin once, then move via transform
+                    glowBase={ x: seamGlow.offsetLeft, y: seamGlow.offsetTop };
+                    seamGlow.style.willChange='transform';
+                }
+                let mx=innerWidth/2,my=innerHeight/2, cx=mx,cy=my, tx=mx,ty=my, raf=null;
+                let gx=(glowBase?glowBase.x:mx), gy=(glowBase?glowBase.y:my);
+                const loop=()=>{
+                    cx+=(mx-cx)*.24; cy+=(my-cy)*.24; tx+=(mx-tx)*.08; ty+=(my-ty)*.08;
+                    gx+=(mx-gx)*.10; gy+=(my-gy)*.10;
+                    if(cur) cur.style.transform=`translate(${cx}px,${cy}px)`;
+                    if(torch) torch.style.transform=`translate(${tx-innerWidth/2}px,${ty-innerHeight/2}px)`;
+                    if(seamGlow && glowBase){ seamGlow.style.transform=`translate(${(gx-glowBase.x).toFixed(1)}px,${(gy-glowBase.y).toFixed(1)}px) translate(-50%,-50%)`; }
+                    const moving=Math.abs(mx-cx)>.4||Math.abs(my-cy)>.4||Math.abs(tx-mx)>.4||Math.abs(gx-mx)>.4;
+                    raf= moving?requestAnimationFrame(loop):null;
+                };
+                li.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; if(!raf) raf=requestAnimationFrame(loop); });
+                li.querySelectorAll('.reveal,.walk-rail,.sc-kin .k-cell').forEach(el=>{
+                    el.addEventListener('mouseenter',()=>cur&&cur.classList.add('lit'));
+                    el.addEventListener('mouseleave',()=>cur&&cur.classList.remove('lit'));
+                });
+                raf=requestAnimationFrame(loop);
+            }
+
+            window.resetToHomeFromIns = function() {
+                document.getElementById('white-overlay').style.opacity='1';
+                const li=document.getElementById('level-ins'); li.classList.remove('active');
+                document.body.classList.remove('ins-cursor-hide');
+                setTimeout(()=>{
+                    li.style.display='none';
+                    li.querySelectorAll('.in-view').forEach(el=>el.classList.remove('in-view'));
+                    const f=li.querySelector('#ins-forest'); if(f) f.scrollTop=0;
+                    li.style.removeProperty('--depth');
+                    document.getElementById('scene-container').style.display='block';
+                    document.getElementById('ui-layer').style.display='block';
+                    if(insLink){
+                        insLink.querySelectorAll('.letter').forEach(l=>{ l.classList.remove('scatter-out'); l.style.transition='none';
+                            l.style.transform='translate3d(var(--fx,0px),var(--fy,0px),0) rotate(var(--fr,0deg))'; l.style.opacity='1'; });
+                        requestAnimationFrame(()=>requestAnimationFrame(()=>{ insLink.querySelectorAll('.letter').forEach(l=>l.style.transition=''); }));
+                    }
+                    brand.style.opacity='1'; quote.style.opacity='0.6'; footerLinks.style.opacity='1'; syncAudioToggle('1');
+                    navItems.forEach(oi=>oi.style.opacity='1');
+                    setTimeout(()=>{ document.getElementById('white-overlay').style.opacity='0'; },50);
+                },1100);
+            };
 
             let navAwakened = false, autoNavTimeout;
             function triggerAwaken() {
@@ -20374,6 +21484,718 @@
                 });
             });
         });
+    })();
+    </script>
+
+        <!-- ============================================================ -->
+        <!-- ===== LEVEL-INSTALLATION v8 — A Walk Into the Forest ======= -->
+        <!-- ===== a descent · the light you carry · body in the wood === -->
+        <!-- ============================================================ -->
+        <div id="level-ins">
+            <div class="ins-sky"></div>
+            <div class="ins-shafts"></div>
+            <div class="ins-torch" id="ins-torch"></div>
+            <div class="ins-spores" id="ins-spores"></div>
+            <div class="ins-grain"></div>
+            <div class="ins-cur" id="ins-cur"></div>
+
+            <div class="ins-lightbox" id="ins-lightbox" aria-hidden="true">
+                <img id="ins-lb-img" src="" alt="">
+                <div class="lb-cap" id="ins-lb-cap"></div>
+                <div class="lb-close" id="ins-lb-close" aria-label="close">×</div>
+            </div>
+
+            <div class="ins-back" onclick="resetToHomeFromIns()">← return</div>
+            <div class="ins-folio">Installation &amp; Space</div>
+            <div class="ins-depth">
+                <div class="fill" id="ins-depth-fill"></div>
+                <div class="mark" style="top:0%">canopy</div>
+                <div class="mark" style="top:38%">the floor</div>
+                <div class="mark" style="top:72%">reversibility</div>
+                <div class="mark" style="top:100%">the dark</div>
+            </div>
+
+            <div class="forest" id="ins-forest">
+                <div class="ins-content">
+
+                    <!-- 00 · CANOPY — single full-bleed image -->
+                    <section class="scene sc-canopy">
+                        <div class="seam-stage">
+                            <div class="bg"></div>
+                            <div class="seam-grow"></div>
+                            <div class="bg-foot"></div>
+                            <div class="seam-skylight"></div>
+                            <div class="seam-mist"></div>
+                            <div class="seam-motes" id="seam-motes"></div>
+                        </div>
+                        <div class="seam-glow" id="seam-glow"></div>
+                        <div class="scene-shade"></div>
+                        <div class="canopy-txt">
+                            <div class="canopy-kick">Movement I · Installation &amp; Space — 2026</div>
+                            <h1 class="canopy-title"><span class="w">Chiasm</span><span class="l2"><span class="w">The</span> <span class="w">Shared</span> <span class="w">Anatomy</span></span></h1>
+                            <p class="canopy-sub">Are the human body and the botanical form, by their very nature, the exact same flesh? Walk down, into the trees, and find it.</p>
+                        </div>
+                        <div class="canopy-cue"><span class="bar"></span> descend into the forest</div>
+                    </section>
+
+                    <!-- spoken line -->
+                    <section class="ins-line drift">
+                        <p><span class="roman">Chiasm: The Shared Anatomy · Camphor wood · 2026</span>A sliver of light filters through the canopy, settling upon these precise <em>contours</em>.</p>
+                    </section>
+
+                    <!-- 01 · APPROACH — the body grown into the great tree (hero) -->
+                    <section class="scene sc-approach">
+                        <div class="scene-img"></div>
+                        <div class="scene-shade"></div>
+                        <div class="scene-cap">
+                            <div class="roman">I — Approach</div>
+                            <div class="t"><span class="frag">This is no grand gesture of surrender to the soil,</span><span class="frag f2 indent">nor a romantic mimicry of the botanical —</span><span class="frag f3 tail">two layers of the same primordial perception, finding one another within the same <em>carnal thickness</em>.</span></div>
+                        </div>
+                    </section>
+
+                    <!-- spoken line -->
+                    <section class="ins-line drift right">
+                        <p>Here, the dappled sun turns fluid, dissolving the boundaries between the firm and the soft, the personal and the <em>non-human</em>.</p>
+                    </section>
+
+                    <!-- 02 · THROUGH THE TREES — horizontal walk -->
+                    <section class="scene sc-walk">
+                        <div class="walk-head">
+                            <h3>The finger that traces the grain</h3>
+                            <div class="lbl">drag — move between the trees</div>
+                        </div>
+                        <div class="walk-rail" id="ins-walk">
+                            <figure class="near"><img src="installation/reversibility/01.jpg" alt=""><figcaption>turned toward the soil</figcaption></figure>
+                            <figure><img src="installation/reversibility/04.jpg" alt=""><figcaption>grain across the back</figcaption></figure>
+                            <div class="walk-interlude">becomes, at the precise moment of overlap, the grain tracing the flesh in return</div>
+                            <figure class="near"><img src="installation/reversibility/03.jpg" alt=""><figcaption>tension, unbound in shadow</figcaption></figure>
+                            <figure><img src="installation/reversibility/05.jpg" alt=""><figcaption>where the line turns inside out</figcaption></figure>
+                            <figure class="near"><img src="installation/reversibility/09.jpg" alt=""><figcaption>through the leaves</figcaption></figure>
+                            <figure><img src="installation/reversibility/11.jpg" alt=""><figcaption>resting on the log</figcaption></figure>
+                        </div>
+                    </section>
+
+                    <!-- 03 · SWALLOWED — grass, near-lost -->
+                    <section class="scene sc-grass">
+                        <div class="scene-img"></div>
+                        <div class="scene-shade"></div>
+                        <div class="scene-q"><p><span class="frag">There is no hierarchy of subject and object here,</span><span class="frag f2 indent">no submission of one to the other.</span><span class="frag f3">Human anatomy in its rigorous precision and the botanical root in its sprawling complexity</span><span class="frag f4 indent2">are but folds of the <em>exact same flesh</em>, bending and turning in different directions.</span></p></div>
+                    </section>
+
+                    <!-- 04 · IN THE DARK — spotlight reveal -->
+                    <section class="scene sc-dark">
+                        <div class="dark-hint">move your light across the dark</div>
+                        <div class="reveal"><img src="installation/reversibility/02.jpg" alt="figure in the dark"><div class="cover"></div><div class="teaser"></div></div>
+                        <div class="reveal-cap">II — At the crown, expression recedes</div>
+                    </section>
+
+                    <!-- spoken line -->
+                    <section class="ins-line drift">
+                        <p><span class="frag">The lines do not break; they merely alter their course, weaving into the elements, turning inside out.</span><span class="frag f2 indent">As facial expression recedes at the crown into an objective singularity of time,</span><span class="frag f3 indent2">consciousness — shorn of identity and social weight — ripples outward through the <em>fibers</em>.</span></p>
+                    </section>
+
+                    <!-- 05 · THE MADE WORLD -->
+                    <section class="scene sc-metal">
+                        <div class="scene-img"></div>
+                        <div class="scene-shade"></div>
+                        <div class="scene-q"><p><span class="frag">Here, matter folds back upon itself; the somatosphere and the world share the very same fabric of being.</span><span class="frag f2 indent">Where human perception meets its limit, the silent intuition of the world rises from the underside to meet it.</span><span class="frag f3 indent2">They do not debate ownership; they simply interlace upon this level plane, acting as each other's <em>reverse side</em>.</span></p></div>
+                    </section>
+
+                    <!-- 06 · SAME ROOT — diptych -->
+                    <section class="scene sc-kin">
+                        <div class="k-cell"><img src="installation/reversibility/env-stump-aerial.jpg" alt="severed stump"><div class="k-label">the felled trunk</div></div>
+                        <div class="k-cell"><img src="installation/reversibility/08.jpg" alt="carved body"><div class="k-label">the carved body</div></div>
+                        <div class="k-mid">— each other's reverse side —</div>
+                    </section>
+
+                    <!-- 07 · BENEATH THE ELDER -->
+                    <section class="scene sc-elder">
+                        <div class="scene-img"></div>
+                        <div class="scene-shade"></div>
+                        <div class="scene-cap">
+                            <div class="roman">III — Beneath the elder tree</div>
+                            <div class="t"><span class="frag">The inner skeleton remains one of cold, lucid inquiry; the surface, a breathable, translucent space.</span><span class="frag f2 tail">On the threshold between the human and the non-human, matter conducts a quiet dialogue on what it means to exist.</span></div>
+                        </div>
+                    </section>
+
+                    <!-- seam: the first work dissolves into the second -->
+                    <div class="works-seam">
+                        <div class="act-card minimal">
+                            <div class="act-rule"></div>
+                            <div class="act-no">II</div>
+                            <div class="act-rule"></div>
+                        </div>
+                    </div>
+
+                    <!-- ============ CHIASM — the mirror that looks back ============ -->
+                    <section class="scene sc-chiasm" id="ch">
+                        <div class="ch-cur" id="ch-cur"></div>
+
+                        <!-- opener: the grove -->
+                        <div class="ch-open">
+                            <div class="ch-bg"></div>
+                            <div class="ch-shade"></div>
+                            <div class="ch-txt">
+                                <div class="ch-kick">Reversibility · Camphor · Oak · Teak · Golden Nanmu · Mirror paper — 2026</div>
+                                <h1 class="ch-title">Reversibility<span class="ch-sub-t">The Annular Speculum</span></h1>
+                                <p class="ch-say ch-say-open">Are the human body and the botanical form, by their very nature, the <em>exact same flesh</em>?</p>
+                            </div>
+                        </div>
+
+                        <aside class="ch-note nl">
+                            <p>A sliver of cold light filters through the dense woodland, striking the raw timber slices carved by the concentric rings of time. The weathered wood frames an irregular perimeter out of thin air; the smooth mirror, embedded deep within the rings, forcefully tears into <em>reality</em>.</p>
+                        </aside>
+
+                        <!-- GAZE I — the hand reaches, the silver answers (hero 06) -->
+                        <div class="ch-gaze" id="ch-gaze">
+                            <div class="gz-frame">
+                                <div class="gz-dark"></div>
+                                <div class="gz-live" id="gz-live"></div>
+                                <div class="gz-ring"></div>
+                            </div>
+                            <div class="gz-hint">move across the glass — let it look back</div>
+                        </div>
+
+                        <aside class="ch-note nr">
+                            <p>The moment a pair of human hands reaches toward this botanical threshold, the silver glass inverts the politics of <em>the seer and the seen</em>.</p>
+                        </aside>
+
+                        <!-- drifting band: the slices suspended among the branches -->
+                        <div class="ch-strip" id="ch-strip">
+                            <figure class="cf cf-tall"><img src="installation/chiasm/05.jpg" alt=""><figcaption>two, side by side</figcaption></figure>
+                            <figure class="cf"><img src="installation/chiasm/10.jpg" alt=""><figcaption>one, in the green dark</figcaption></figure>
+                            <div class="ch-say-inline"><span class="ci-soft">no human elevated as spectator, no forest relegated to background — the finger that traces the bark activates</span> <span class="ci-key">nature's unblinking gaze upon the flesh</span></div>
+                            <figure class="cf cf-tall"><img src="installation/chiasm/07.jpg" alt=""><figcaption>swaying, unowned</figcaption></figure>
+                            <figure class="cf"><img src="installation/chiasm/11.jpg" alt=""><figcaption>the clearing, from afar</figcaption></figure>
+                        </div>
+
+                        <!-- GAZE II — the palm against the silver (13) -->
+                        <div class="ch-gaze" id="ch-gaze2">
+                            <div class="gz-frame gz-frame2">
+                                <div class="gz-dark"></div>
+                                <div class="gz-live" id="gz-live2"></div>
+                                <div class="gz-ring"></div>
+                            </div>
+                            <div class="gz-hint">press your gaze into the grain</div>
+                        </div>
+
+                        <aside class="ch-note nl">
+                            <p>The defensive ego is dismantled by this visual trap. Consciousness, shorn of social identity, ripples outward through the alignment of rings and the silhouette of the hand, drifting into <em>alien textures</em>.</p>
+                        </aside>
+
+                        <!-- swallowed skies: a mosaic of mirror-pools -->
+                        <div class="ch-mosaic">
+                            <figure class="mq mq-big"><img src="installation/chiasm/15.jpg" alt=""><figcaption>the sky, drunk by the wood</figcaption></figure>
+                            <figure class="mq"><img src="installation/chiasm/01.jpg" alt=""></figure>
+                            <figure class="mq"><img src="installation/chiasm/16.jpg" alt=""></figure>
+                            <figure class="mq mq-wide"><img src="installation/chiasm/02.jpg" alt=""><figcaption>two pools, one ground</figcaption></figure>
+                        </div>
+
+                        <aside class="ch-note nr">
+                            <p>Here, matter turns inside out; the threshold between the human and the non-human erases in absolute silence. As the suspended slices sway among the branches, the micro-universe within the mirror undulates like ripples, <em>expanding without a center</em>.</p>
+                        </aside>
+
+                        <!-- embedded & standing: the work in the body of the tree -->
+                        <div class="ch-trio">
+                            <figure class="tf"><img src="installation/chiasm/03.jpg" alt=""><figcaption>set into the trunk</figcaption></figure>
+                            <figure class="tf tf-tall"><img src="installation/chiasm/04.jpg" alt=""><figcaption>standing, a threshold</figcaption></figure>
+                            <figure class="tf"><img src="installation/chiasm/12.jpg" alt=""><figcaption>a circle on the floor</figcaption></figure>
+                        </div>
+
+                        <!-- backlit finale -->
+                        <div class="ch-finale">
+                            <div class="cfin cfin-a"><img src="installation/chiasm/09.jpg" alt=""></div>
+                            <div class="cfin cfin-b"><img src="installation/chiasm/14.jpg" alt=""></div>
+                            <div class="ch-say-fin">— the same flesh, turning in different directions —</div>
+                        </div>
+
+                        <aside class="ch-note nc">
+                            <p>There is no debate of ownership here. Upon this level plane of absolute equality, the inner structure remains one of cold inquiry; the surface, a breathable clearing of light and shadow. We look into the folds of rings and reflections, and encounter the <em>silent intuition of all things</em>.</p>
+                        </aside>
+                    </section>
+
+                    <!-- 08 · CLOSE — the clearing -->
+                    <section class="scene sc-close">
+                        <p class="c-main">Leaving vast, open spaces to breathe within the primordial fabric of the world,<br>we look into the folds of rings and reflections, and recognize one another.</p>
+                        <div class="c-sign">Zhanyi Hu</div>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+
+    <script>
+    (function(){
+    // three.js r128 global build (THREE.*) — works under file:// (no modules)
+    const OrbitControls = THREE.OrbitControls;
+    const GLTFLoader = THREE.GLTFLoader;
+    // Prefer an embedded base64 data-URI (works under file://), else the file path.
+    function scuModelSrc(s){
+        if (s && s.id && window.SCU_MODELS && window.SCU_MODELS[s.id]) return window.SCU_MODELS[s.id];
+        return s ? s.model : null;
+    }
+    function scuHasModel(s){ return !!scuModelSrc(s); }
+    // r128: ensure baseColor textures are treated as sRGB (otherwise washed-out/grey)
+    function fixGltfColor(root){
+        root.traverse(o=>{
+            if(o.isMesh && o.material){
+                const mats = [].concat(o.material);
+                mats.forEach(m=>{
+                    if(m.map){ m.map.encoding = THREE.sRGBEncoding; m.map.needsUpdate = true; }
+                    if(m.emissiveMap){ m.emissiveMap.encoding = THREE.sRGBEncoding; }
+                    // Matte hand-finished resin: high roughness kills the plastic
+                    // sheen; a touch of env intensity + clearcoat lets surface
+                    // relief (folds, petals, hair) catch light → more structure.
+                    m.roughness = (m.roughness!==undefined)? Math.min(Math.max(m.roughness,0.62),0.92):0.78;
+                    m.metalness = 0.0;
+                    if('envMapIntensity' in m) m.envMapIntensity = 0.55;
+                    if('clearcoat' in m){ m.clearcoat = 0.18; m.clearcoatRoughness = 0.6; }
+                    m.needsUpdate = true;
+                });
+            }
+        });
+    }
+
+    let renderer, scene, cam, ctrl, raf, current, pmrem, envTex;
+    const stage  = () => document.getElementById('scu-3d-stage');
+    const canvas = () => document.getElementById('scu-3d-canvas');
+
+    function init() {
+        if (renderer) return;
+        const cv = canvas();
+        renderer = new THREE.WebGLRenderer({ canvas: cv, antialias:true, alpha:true });
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 0.95;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+
+        scene = new THREE.Scene();
+        cam = new THREE.PerspectiveCamera(38, 1, 0.01, 100);
+        cam.position.set(0, 0.25, 3.4);
+
+        ctrl = new OrbitControls(cam, cv);
+        ctrl.enableDamping = true; ctrl.dampingFactor = 0.08;
+        ctrl.autoRotate = true; ctrl.autoRotateSpeed = 1.1;
+        ctrl.enablePan = false; ctrl.minDistance = 1.8; ctrl.maxDistance = 6;
+        cv.addEventListener('pointerdown', () => { ctrl.autoRotate = false; });
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.38));
+        const key = new THREE.DirectionalLight(0xfff1d8, 1.8); key.position.set(3,4,3); scene.add(key);
+        const rim = new THREE.DirectionalLight(0xaeb8c0, 1.1); rim.position.set(-4,1,-2); scene.add(rim);
+        const fill= new THREE.DirectionalLight(0xd8ba78, 0.6); fill.position.set(0,-2,2); scene.add(fill);
+
+        pmrem = new THREE.PMREMGenerator(renderer);
+        const es = new THREE.Scene(); es.background = new THREE.Color(0x222018);
+        envTex = pmrem.fromScene(es, 0.04).texture;
+        scene.environment = envTex;
+
+        resize();
+        addEventListener('resize', resize);
+        (function loop(){ raf = requestAnimationFrame(loop); if(ctrl) ctrl.update(); if(renderer) renderer.render(scene, cam); })();
+    }
+
+    function resize() {
+        if (!renderer) return;
+        const r = stage().getBoundingClientRect();
+        if (r.width < 2) return;
+        renderer.setSize(r.width, r.height, false);
+        cam.aspect = r.width / r.height; cam.updateProjectionMatrix();
+    }
+
+    function clearModel() {
+        if (current) { scene.remove(current);
+            current.traverse(o=>{ if(o.geometry)o.geometry.dispose();
+                if(o.material){ const m=[].concat(o.material); m.forEach(mt=>{ for(const k in mt){ if(mt[k]&&mt[k].isTexture)mt[k].dispose(); } mt.dispose&&mt.dispose(); }); } });
+            current = null; }
+    }
+
+    window.mountScuViewer = function(s) {
+        const st = stage(), img = document.getElementById('scu-detail-img'), hint = document.getElementById('scu-3d-hint');
+        const src = scuModelSrc(s);
+        if (!src) {  // fallback to flat image
+            if (renderer) renderer.domElement.style.display='none';
+            img.style.display='block'; img.src = s.src; if(hint) hint.style.display='none';
+            return;
+        }
+        init();
+        renderer.domElement.style.display='block'; img.style.display='none'; if(hint) hint.style.display='';
+        st.classList.add('loading');
+        // defer until layout settles so size is right
+        requestAnimationFrame(()=>requestAnimationFrame(resize));
+        const loader = new GLTFLoader();
+        loader.load(src, (g)=>{
+            clearModel();
+            current = g.scene;
+            fixGltfColor(current);
+            const box = new THREE.Box3().setFromObject(current);
+            const c = box.getCenter(new THREE.Vector3());
+            current.position.sub(c);
+            // initial 3/4 front-facing angle
+            current.rotation.y = Math.PI * 0.92;
+            scene.add(current);
+            ctrl.target.set(0,0,0); ctrl.autoRotate = true; ctrl.update();
+            st.classList.remove('loading');
+            resize();
+        }, undefined, (e)=>{
+            // on error, fall back to image
+            st.classList.remove('loading');
+            renderer.domElement.style.display='none'; img.style.display='block'; img.src=s.src;
+        });
+    };
+
+    window.unmountScuViewer = function() {
+        if (ctrl) ctrl.autoRotate = false;
+        clearModel();
+    };
+
+    // ============================================================
+    // FULL 3D VIEWER (detail page, lower section) — a single specimen
+    // you can turn completely freely: over the top, under the feet,
+    // any angle, and zoom right in. Independent renderer so it never
+    // fights the vitrine or the old viewer.
+    // ============================================================
+    let v3Renderer, v3Scene, v3Cam, v3Ctrl, v3Raf, v3Model, v3Pmrem;
+    const v3Stage  = () => document.getElementById('scu-360-stage');
+    const v3Canvas = () => document.getElementById('scu-360-canvas');
+
+    function v3Resize(){
+        if(!v3Renderer) return;
+        const r = v3Stage().getBoundingClientRect();
+        if(r.width<2) return;
+        v3Renderer.setSize(r.width, r.height, false);
+        v3Cam.aspect = r.width/r.height; v3Cam.updateProjectionMatrix();
+    }
+
+    function v3Init(){
+        if(v3Renderer) return;
+        const cv = v3Canvas();
+        v3Renderer = new THREE.WebGLRenderer({ canvas: cv, antialias:true, alpha:true });
+        v3Renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+        v3Renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        v3Renderer.toneMappingExposure = 1.0;
+        v3Renderer.outputEncoding = THREE.sRGBEncoding;
+
+        v3Scene = new THREE.Scene();
+        v3Cam = new THREE.PerspectiveCamera(38, 1, 0.01, 100);
+        v3Cam.position.set(0, 0.2, 3.4);
+
+        v3Ctrl = new OrbitControls(v3Cam, cv);
+        v3Ctrl.enableDamping = true; v3Ctrl.dampingFactor = 0.08;
+        v3Ctrl.enablePan = false;
+        v3Ctrl.autoRotate = true; v3Ctrl.autoRotateSpeed = 1.0;
+        // FULLY FREE: no polar clamp → look over the top and under the base.
+        v3Ctrl.minPolarAngle = 0; v3Ctrl.maxPolarAngle = Math.PI;
+        // zoom from far back right up close.
+        v3Ctrl.minDistance = 0.9; v3Ctrl.maxDistance = 8;
+        v3Ctrl.target.set(0,0,0);
+        cv.addEventListener('pointerdown', ()=>{ v3Ctrl.autoRotate = false; });
+
+        // soft museum-window light, slightly warm, with cool rim for structure
+        v3Scene.add(new THREE.AmbientLight(0xffffff, 0.42));
+        const key = new THREE.DirectionalLight(0xfff1d8, 1.5); key.position.set(3,4,3); v3Scene.add(key);
+        const rim = new THREE.DirectionalLight(0xb6c0c8, 1.0); rim.position.set(-4,1.5,-2); v3Scene.add(rim);
+        const fill= new THREE.DirectionalLight(0xe0c890, 0.5); fill.position.set(0,-2.5,2); v3Scene.add(fill);
+        // a touch of light from directly below so the underside isn't black
+        const under = new THREE.DirectionalLight(0xffffff, 0.25); under.position.set(0,-4,0); v3Scene.add(under);
+
+        v3Pmrem = new THREE.PMREMGenerator(v3Renderer);
+        const es = new THREE.Scene(); es.background = new THREE.Color(0x403e36);
+        v3Scene.environment = v3Pmrem.fromScene(es, 0.5).texture;
+
+        v3Resize();
+        addEventListener('resize', v3Resize);
+        (function loop(){ v3Raf = requestAnimationFrame(loop); if(v3Ctrl) v3Ctrl.update(); if(v3Renderer) v3Renderer.render(v3Scene, v3Cam); })();
+    }
+
+    function v3Clear(){
+        if(v3Model){ v3Scene.remove(v3Model);
+            v3Model.traverse(o=>{ if(o.geometry)o.geometry.dispose();
+                if(o.material){ const m=[].concat(o.material); m.forEach(mt=>{ for(const k in mt){ if(mt[k]&&mt[k].isTexture)mt[k].dispose(); } mt.dispose&&mt.dispose(); }); } });
+            v3Model = null; }
+    }
+
+    window.mountScu360 = function(s){
+        const st = v3Stage(); if(!st) return;
+        const src = scuModelSrc(s);
+        if(!src) return;   // no model → just leave the section empty/hidden
+        v3Init();
+        // ── per-specimen ambient aura, keyed to its colour family (tint) ──
+        // parse "rgba(r,g,b,a)" → build a soft inner glow + faint outer haze
+        (function setAura(){
+            let r=200,g=200,b=190;
+            const m = (s.tint||'').match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+            if(m){ r=+m[1]; g=+m[2]; b=+m[3]; }
+            // lift toward light so the haze stays airy, not muddy
+            const lift = (c)=> Math.round(c + (255-c)*0.45);
+            const lr=lift(r), lg=lift(g), lb=lift(b);
+            st.style.setProperty('--aura-1', `rgba(${lr},${lg},${lb},0.55)`);
+            st.style.setProperty('--aura-2', `rgba(${r},${g},${b},0.30)`);
+            // nudge the scene's environment + key tint toward the same family
+            if(v3Scene){
+                v3Scene.environment = v3Pmrem.fromScene(
+                    (()=>{ const e=new THREE.Scene();
+                        e.background=new THREE.Color(`rgb(${Math.round(r*0.5+90)},${Math.round(g*0.5+90)},${Math.round(b*0.5+90)})`);
+                        return e; })(), 0.5).texture;
+            }
+        })();
+        st.classList.add('loading');
+        requestAnimationFrame(()=>requestAnimationFrame(v3Resize));
+        new GLTFLoader().load(src, (g)=>{
+            v3Clear();
+            v3Model = g.scene;
+            fixGltfColor(v3Model);
+            v3Model.traverse(m=>{ if(m.isMesh){ m.castShadow=false; m.receiveShadow=false; } });
+            // center it on the orbit target and scale to a consistent framing
+            let box = new THREE.Box3().setFromObject(v3Model);
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z, 0.0001);
+            const sc = 2.1 / maxDim;
+            v3Model.scale.setScalar(sc);
+            box = new THREE.Box3().setFromObject(v3Model);
+            const c = box.getCenter(new THREE.Vector3());
+            v3Model.position.sub(c);
+            v3Model.rotation.y = Math.PI*0.92;
+            v3Scene.add(v3Model);
+            v3Ctrl.target.set(0,0,0); v3Ctrl.autoRotate = true; v3Ctrl.update();
+            st.classList.remove('loading');
+            v3Resize();
+        }, undefined, ()=>{ st.classList.remove('loading'); });
+    };
+
+    window.unmountScu360 = function(){
+        if(v3Ctrl) v3Ctrl.autoRotate = false;
+        v3Clear();
+    };
+
+    // ============================================================
+    // THE VITRINE — horizontal 3D shelf gallery (replaces cards)
+    // 5 pedestals in a row; loaded models stand on them, the rest
+    // are empty plinths. Drag to pan the shelf, hover to lift a
+    // figure, click to enter its detail page.
+    // ============================================================
+    let sRenderer, sScene, sCam, sCtrl, sRaf, sRayc, sPointer, sHover=null, sBuilt=false;
+    let sSlots=[]; // {group, model, specimen, baseY, plinth}
+    const shelfCanvas = () => document.getElementById('scu-shelf-canvas');
+    const vitrine     = () => document.getElementById('scu-vitrine');
+
+    function shelfResize(){
+        if(!sRenderer) return;
+        const r = vitrine().getBoundingClientRect();
+        if(r.width<2) return;
+        sRenderer.setSize(r.width, r.height, false);
+        sCam.aspect = r.width/r.height; sCam.updateProjectionMatrix();
+    }
+
+    window.mountScuShelf = function(){
+        const specimens = window.SCU_SPECIMENS || [];
+        const cv = shelfCanvas(); if(!cv) return;
+        const v = vitrine(); v.classList.add('loading');
+
+        if(!sRenderer){
+            sRenderer = new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true, premultipliedAlpha:false});
+            sRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
+            sRenderer.setClearColor(0x000000, 0);
+            sRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+            sRenderer.toneMappingExposure = 0.96;
+            sRenderer.outputEncoding = THREE.sRGBEncoding;
+            sRenderer.shadowMap.enabled = true;
+            sRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            sScene = new THREE.Scene();
+            sCam = new THREE.PerspectiveCamera(40, 1, 0.01, 100);
+            sCam.position.set(0, 1.7, 12.4);
+
+            sCtrl = new OrbitControls(sCam, cv);
+            sCtrl.enableDamping = true; sCtrl.dampingFactor = 0.09;
+            sCtrl.enablePan = false; sCtrl.enableZoom = true;
+            sCtrl.minDistance = 4.5; sCtrl.maxDistance = 18;
+            // allow looking over the top and slightly under the row, without
+            // flipping all the way under the floor (keeps the "shelf" reading).
+            sCtrl.minPolarAngle = Math.PI*0.12; sCtrl.maxPolarAngle = Math.PI*0.86;
+            sCtrl.autoRotate = true; sCtrl.autoRotateSpeed = 0.5;
+            sCtrl.target.set(0, 0.2, 0);
+            cv.addEventListener('pointerdown', ()=>{ sCtrl.autoRotate = false; });
+
+            // Softer overall fill + a directional key with a wide soft shadow,
+            // so the resin reads as matte sculpture with gentle, believable
+            // contact shadows rather than a hard black blob.
+            sScene.add(new THREE.AmbientLight(0xffffff, 0.46));
+            const k = new THREE.DirectionalLight(0xfff3da, 1.05); k.position.set(4,8.5,5);
+            k.castShadow = true;
+            k.shadow.mapSize.set(4096,4096);
+            k.shadow.radius = 9;
+            k.shadow.camera.near = 0.5; k.shadow.camera.far = 34;
+            k.shadow.camera.left = -9; k.shadow.camera.right = 9;
+            k.shadow.camera.top = 9; k.shadow.camera.bottom = -9;
+            k.shadow.bias = -0.0003; k.shadow.normalBias = 0.025;
+            sScene.add(k);
+            // cool rim from behind gives the form a defined edge → more structure
+            const rm= new THREE.DirectionalLight(0xc4ccd2, 0.7); rm.position.set(-5,3,-4); sScene.add(rm);
+            const fl= new THREE.DirectionalLight(0xe4ce9c, 0.3); fl.position.set(0,-2,4); sScene.add(fl);
+            const pm = new THREE.PMREMGenerator(sRenderer);
+            const es = new THREE.Scene(); es.background = new THREE.Color(0x424038);
+            sScene.environment = pm.fromScene(es,0.5).texture;
+
+            // invisible ground that only catches shadows — figures appear to
+            // stand on the floor with a real cast shadow, no visible base.
+            const ground = new THREE.Mesh(
+                new THREE.PlaneGeometry(60,60),
+                new THREE.ShadowMaterial({opacity:0.22}));
+            ground.rotation.x = -Math.PI/2;
+            ground.position.y = -1.15;
+            ground.receiveShadow = true;
+            sScene.add(ground);
+
+            sRayc = new THREE.Raycaster(); sPointer = new THREE.Vector2();
+            cv.addEventListener('pointermove', onShelfMove);
+            cv.addEventListener('click', onShelfClick);
+            addEventListener('resize', shelfResize);
+            (function loop(){ sRaf = requestAnimationFrame(loop);
+                if(sCtrl) sCtrl.update();
+                const now = performance.now();
+                sSlots.forEach(sl=>{
+                    if(!sl.model) return;
+                    // gentle idle spin
+                    sl.model.rotation.y += 0.003;
+                    // ── shared breath-in entrance ──────────────────────────
+                    // each figure has a small delay keyed to its distance from
+                    // the centre slot, so the row blooms outward from the middle.
+                    let introT = 1;
+                    if(sIntroOn){
+                        const dur = 1500; // ms per figure
+                        const delay = Math.abs((sl.slotIdx!==undefined?sl.slotIdx:2) - 2) * 180;
+                        const e = Math.max(0, Math.min(1, (now - sIntroStart - delay) / dur));
+                        introT = easeOutCubic(e);
+                        sl.model.traverse(m=>{ if(m.isMesh && m.material){
+                            [].concat(m.material).forEach(mt=>{ mt.opacity = introT; if(introT>=1) mt.transparent=false; });
+                        }});
+                        if(sSlots.every(s=> !s.model || (now - sIntroStart - Math.abs((s.slotIdx!==undefined?s.slotIdx:2)-2)*180) >= dur)){
+                            sIntroOn = false;
+                        }
+                    }
+                    // rest height = sunk(-0.55) lerped up to baseY via introT,
+                    // plus hover lift; a slow sine adds a living "breath".
+                    const sunk = -0.55 * (1 - introT);
+                    const hover = (sHover===sl)? 0.18 : 0;
+                    const breath = 0.025 * Math.sin(now*0.0012 + (sl.slotIdx||0)*1.3);
+                    const tgt = sl.baseY + sunk + hover + (introT>=1 ? breath : 0);
+                    sl.group.position.y += (tgt - sl.group.position.y)*0.12;
+                });
+                if(sRenderer) sRenderer.render(sScene, sCam);
+            })();
+        }
+
+        // (re)build the row
+        sSlots.forEach(sl=> sScene.remove(sl.group));
+        sSlots = [];
+        const n = Math.max(specimens.length,5);
+        const spacing = 2.2;
+        const x0 = -((n-1)*spacing)/2;
+        const groundY = -1.15;
+        // Display ORDER along the row (left→right). The Sporeling (staghorn fern)
+        // is the strongest silhouette, so seat it dead-centre. Others flank it.
+        // specimen ids: sporeling, heliconia, monstera, titan, dionaea
+        const order = ['heliconia','titan','sporeling','monstera','dionaea'];
+        const posOf = (id)=>{ const k = order.indexOf(id); return k<0 ? 2 : k; };
+        // front/back stagger keyed to the DISPLAY slot, not the data index,
+        // so the row never reads as a flat line. Centre figure sits forward.
+        const zBySlot = [ -0.5, 0.9, 0.4, 0.9, -0.5 ];
+        // per-specimen height tuning: tall+spiky silhouettes (titan's spadix,
+        // bird-of-paradise's crest) inflate the bounding box and shrink the
+        // body, so give them a larger target height to match the others.
+        const targetH = { sporeling:2.45, heliconia:2.95, monstera:2.4, titan:3.0, dionaea:2.35 };
+        let toLoad = 0, loaded = 0;
+        const pending = [];
+        specimens.forEach((s)=>{
+            const slotIdx = posOf(s.id);
+            const group = new THREE.Group();
+            group.position.set(x0 + slotIdx*spacing, 0, (zBySlot[slotIdx]!==undefined?zBySlot[slotIdx]:0));
+            sScene.add(group);
+            const slot = {group, model:null, specimen:s, baseY:0, slotIdx, entered:false, intro:0};
+            sSlots.push(slot);
+            const src = scuModelSrc(s);
+            if(src){
+                toLoad++;
+                new GLTFLoader().load(src, (g)=>{
+                    const o = g.scene;
+                    fixGltfColor(o);
+                    o.traverse(m=>{ if(m.isMesh){ m.castShadow = true; m.receiveShadow = false; } });
+                    // 1) measure raw size, scale to target height
+                    let box = new THREE.Box3().setFromObject(o);
+                    const size = box.getSize(new THREE.Vector3());
+                    const th = targetH[s.id] || 2.4;
+                    const sc = th / Math.max(size.y, 0.0001);
+                    o.scale.setScalar(sc);
+                    o.rotation.y = Math.PI*0.92;
+                    // 2) re-measure, recenter X/Z, seat base directly on the ground
+                    box = new THREE.Box3().setFromObject(o);
+                    const c = box.getCenter(new THREE.Vector3());
+                    o.position.x += -c.x;
+                    o.position.z += -c.z;
+                    o.position.y += groundY - box.min.y;
+                    // start invisible + slightly sunk; the shared intro below
+                    // breathes them up together (no per-figure pop).
+                    o.traverse(m=>{ if(m.isMesh && m.material){
+                        [].concat(m.material).forEach(mt=>{ mt.transparent = true; mt.opacity = 0; });
+                    }});
+                    group.add(o);
+                    slot.model = o; slot.baseY = 0;
+                    group.position.y = -0.55;            // sunk, waiting to rise
+                    loaded++;
+                    if(loaded>=toLoad){
+                        v.classList.remove('loading');
+                        startShelfIntro();               // everyone ready → rise together
+                    }
+                    shelfResize();
+                }, undefined, ()=>{ loaded++; if(loaded>=toLoad){ v.classList.remove('loading'); startShelfIntro(); } });
+            }
+        });
+        if(toLoad===0) v.classList.remove('loading');
+        sBuilt = true;
+        requestAnimationFrame(()=>requestAnimationFrame(shelfResize));
+    };
+
+    // Shared, staggered breath-in: all figures fade + rise from sunk to rest
+    // on a gentle eased curve. Centre figure leads, flanks follow — reads as
+    // the forest exhaling them into place rather than items popping onto a shelf.
+    let sIntroStart = 0, sIntroOn = false;
+    function startShelfIntro(){
+        sIntroStart = performance.now();
+        sIntroOn = true;
+        sSlots.forEach(sl=>{ sl.entered = false; sl.intro = 0; });
+    }
+    function easeOutCubic(t){ return 1 - Math.pow(1-t, 3); }
+
+    function onShelfMove(e){
+        if(!sRayc) return;
+        const r = shelfCanvas().getBoundingClientRect();
+        sPointer.x = ((e.clientX-r.left)/r.width)*2-1;
+        sPointer.y = -((e.clientY-r.top)/r.height)*2+1;
+        sRayc.setFromCamera(sPointer, sCam);
+        let hit=null;
+        for(const sl of sSlots){ if(!sl.model) continue;
+            if(sRayc.intersectObject(sl.model, true).length){ hit=sl; break; } }
+        sHover = hit;
+        shelfCanvas().style.cursor = hit? 'pointer' : 'grab';
+        const nameEl = document.getElementById('scu-shelf-name');
+        if(nameEl){ if(hit){ nameEl.textContent = hit.specimen.name; nameEl.classList.add('show'); }
+            else nameEl.classList.remove('show'); }
+    }
+    function onShelfClick(){
+        if(sHover && window.openSculptureDetail){
+            const s = sHover.specimen;
+            if(sCtrl) sCtrl.autoRotate=false;
+            window.openSculptureDetail(s);
+        }
+    }
+    window.__shelfDebug = function(){
+        return sSlots.map(sl=>({
+            name: sl.specimen && sl.specimen.name,
+            hasModel: !!sl.model,
+            groupX: sl.group.position.x.toFixed(2),
+            modelY: sl.model ? sl.model.position.y.toFixed(2) : null,
+            modelScale: sl.model ? sl.model.scale.x.toFixed(3) : null
+        }));
+    };
     })();
     </script>
 </body>
